@@ -128,6 +128,26 @@ npm start
 ```
 Open [http://localhost:3001](http://localhost:3001) in your browser.
 
+### 7. Deploy to Vercel (Fullstack Serverless)
+
+Pramana is pre-configured for zero-friction fullstack deployment on Vercel:
+
+1. **Option A: Vercel CLI**
+   ```bash
+   npm i -g vercel
+   vercel
+   ```
+
+2. **Option B: Vercel Web Dashboard**
+   - Import your GitHub repository (`karanscosmo/pramana`).
+   - Framework Preset: **Other**.
+   - Build Command: `npm run vercel-build` (pre-configured in `vercel.json`).
+   - Output Directory: Leave blank (Vercel automatically serves `public/` at the root and executes `api/index.js` for `/api/*` routes).
+   - Add Environment Variables in Project Settings:
+     - `ANTHROPIC_API_KEY`: *(Optional)* Your Claude Vision API key.
+     - `JWT_SECRET`: A secure random string for authentication.
+     - `DATABASE_URL`: *(Optional)* Defaults automatically to `file:/tmp/dev.db` for ephemeral serverless instances, or connect to Neon / Supabase / Turso.
+
 ---
 
 ## 📊 Real Benchmark Metrics (From Actual Test Runs)

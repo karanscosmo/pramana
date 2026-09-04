@@ -56,10 +56,17 @@ function optionalAuthMiddleware(req: AuthenticatedRequest, _res: Response, next:
   next();
 }
 
-// Configure uploads directory
-const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
+// Configure uploads directory (use /tmp/uploads on Vercel where root filesystem is read-only)
+const UPLOADS_DIR = process.env.VERCEL
+  ? path.join("/tmp", "uploads")
+  : path.resolve(process.cwd(), "uploads");
+
 if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  try {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  } catch (e) {
+    console.warn("[Pramana] Could not create uploads dir:", e);
+  }
 }
 
 // Multer storage
@@ -81,9 +88,43 @@ const upload = multer({
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
+
+// Database auto-connection middleware for serverless invocations
+app.use(async (_req: Request, _res: Response, next: () => void) => {
+  try {
+    await initDb();
+  } catch (err) {
+    console.error("[Pramana] Database initialization error:", err);
+  }
+  next();
+});
+
 const PUBLIC_DIR = path.resolve(process.cwd(), "public");
 app.use(express.static(PUBLIC_DIR));
 app.use("/uploads", express.static(UPLOADS_DIR));
+
+/**
+ * Root API service directory
+ */
+app.get("/api", (_req: Request, res: Response) => {
+  res.json({
+    status: "healthy",
+    service: "Pramana KYB Verification Agent",
+    version: "1.0.0",
+    claudeVisionAvailable: Boolean(ANTHROPIC_API_KEY),
+    endpoints: {
+      health: "/api/health",
+      scenarios: "/api/demo/scenarios",
+      demoRun: "/api/demo/run",
+      session: "/api/session",
+      auth: {
+        signup: "/api/auth/signup",
+        login: "/api/auth/login",
+        me: "/api/auth/me",
+      },
+    },
+  });
+});
 
 /**
  * Health check endpoint

@@ -4,7 +4,9 @@
   "description": "Pramana - KYB Document Verification Agent with Deterministic & Explainable Evidence Trail",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate && tsc",
+    "vercel-build": "prisma generate && tsc",
+    "postinstall": "prisma generate",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "test": "tsx --test tests/**/*.test.ts",
