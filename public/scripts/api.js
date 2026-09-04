@@ -66,6 +66,29 @@ export const API = {
     return res.json();
   },
 
+  async verifyBundle(sessionId, filesMap) {
+    const formData = new FormData();
+    for (const [docType, file] of Object.entries(filesMap)) {
+      if (file) {
+        formData.append(docType, file);
+      }
+    }
+
+    const res = await fetch(`/api/session/${sessionId}/verify-bundle`, {
+      method: 'POST',
+      headers: {
+        ...this.getAuthHeaders()
+      },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || err.message || 'Failed to verify document bundle');
+    }
+    return res.json();
+  },
+
   async getReport(sessionId) {
     const res = await fetch(`/api/session/${sessionId}/report`, {
       headers: {

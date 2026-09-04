@@ -132,7 +132,50 @@ export async function matchNamesAcrossDocuments(
 
   const pairwiseResults: PairwiseComparison[] = [];
 
-  // If Claude API key is configured, prompt Claude 3.5 Sonnet for semantic judgment
+  // If all names match deterministically with high confidence (>= 0.90), return immediately (< 1ms)
+  let allExact = true;
+  for (let i = 0; i < validNames.length; i++) {
+    for (let j = i + 1; j < validNames.length; j++) {
+      const comp = computeNameSimilarity(validNames[i].name, validNames[j].name);
+      if (comp.score < 0.9) {
+        allExact = false;
+        break;
+      }
+    }
+    if (!allExact) break;
+  }
+
+  if (allExact && validNames.length >= 2) {
+    // Return deterministic match instantly
+    for (let i = 0; i < validNames.length; i++) {
+      for (let j = i + 1; j < validNames.length; j++) {
+        const docA = validNames[i];
+        const docB = validNames[j];
+        const comp = computeNameSimilarity(docA.name, docB.name);
+        pairwiseResults.push({
+          docA: `${docA.docType} (${docA.sourceField})`,
+          nameA: docA.name,
+          docB: `${docB.docType} (${docB.sourceField})`,
+          nameB: docB.name,
+          judgment: comp.judgment,
+          similarityScore: Math.round(comp.score * 100) / 100,
+          reasoning: comp.reasoning,
+        });
+      }
+    }
+    return {
+      checkType: "name_cross_match",
+      result: "pass",
+      detail: `Legal entity names match across all ${validNames.length} uploaded documents.`,
+      evidence: {
+        evaluationMethod: "Deterministic Semantic Normalization & Token Overlap",
+        comparisons: pairwiseResults,
+        namesExtracted: validNames,
+      },
+    };
+  }
+
+  // If Claude API key is configured, prompt Claude 3.5 Sonnet for semantic judgment with 3500ms timeout
   if (apiKey) {
     try {
       const anthropic = new Anthropic({ apiKey });
@@ -164,11 +207,16 @@ Return STRICT JSON adhering to this structure:
   ]
 }`;
 
-      const response = await anthropic.messages.create({
+      const claudePromise = anthropic.messages.create({
         model: "claude-3-5-sonnet-20241022",
         max_tokens: 1024,
         messages: [{ role: "user", content: prompt }],
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Claude name match timeout")), 3500)
+      );
+
+      const response = await Promise.race([claudePromise, timeoutPromise]);
 
       const content = response.content[0];
       if (content.type === "text") {

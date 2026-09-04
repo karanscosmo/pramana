@@ -31,10 +31,14 @@ export async function generateUnderwriterNarrative(
   context: SessionEvidenceContext,
   apiKey?: string
 ): Promise<string> {
-  // If Anthropic API key is present, generate with Claude 3.5 Sonnet
+  // If Anthropic API key is present, generate with Claude 3.5 Sonnet (with strict 3500ms timeout)
   if (apiKey) {
     try {
-      return await generateNarrativeWithClaude(context, apiKey);
+      const claudePromise = generateNarrativeWithClaude(context, apiKey);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Claude narrative timeout")), 3500)
+      );
+      return await Promise.race([claudePromise, timeoutPromise]);
     } catch (err: any) {
       console.warn("Claude Underwriter Narrative synthesis fallback:", err.message);
     }

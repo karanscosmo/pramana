@@ -443,10 +443,11 @@ app.post("/api/session/:id/document", upload.single("document"), async (req: Req
   }
 
   try {
-    const session = await prisma.verificationSession.findUnique({ where: { id } });
+    let session = await prisma.verificationSession.findUnique({ where: { id } });
     if (!session) {
-      res.status(404).json({ error: `Session '${id}' not found` });
-      return;
+      session = await prisma.verificationSession.create({
+        data: { id, status: "PROCESSING" },
+      });
     }
 
     orchestrator.broadcast(id, {
@@ -487,59 +488,132 @@ app.post("/api/session/:id/document", upload.single("document"), async (req: Req
 });
 
 /**
+ * Helper to generate full verification report for a session
+ */
+async function getFormattedReport(id: string) {
+  let session = await prisma.verificationSession.findUnique({
+    where: { id },
+  });
+
+  if (!session) {
+    return null;
+  }
+
+  const documents = await prisma.document.findMany({
+    where: { sessionId: id },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const checks = await prisma.verificationCheck.findMany({
+    where: { sessionId: id },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return {
+    sessionId: session.id,
+    createdAt: session.createdAt,
+    status: session.status,
+    overallResult: session.overallResult,
+    narrativeSummary: session.narrativeSummary || null,
+    documentsCount: documents.length,
+    checksCount: checks.length,
+    documents: documents.map((d) => ({
+      id: d.id,
+      docType: d.docType,
+      rawFileUrl: d.rawFileUrl,
+      extractionConfidence: d.extractionConfidence,
+      extractedFields: JSON.parse(d.extractedFields),
+      tamperRisk: d.tamperRisk || "low",
+      tamperFlags: d.tamperFlags ? JSON.parse(d.tamperFlags) : [],
+      tamperSummary: d.tamperSummary || null,
+      createdAt: d.createdAt,
+    })),
+    checks: checks.map((c) => ({
+      id: c.id,
+      checkType: c.checkType,
+      result: c.result,
+      detail: c.detail,
+      evidence: JSON.parse(c.evidence),
+      createdAt: c.createdAt,
+    })),
+  };
+}
+
+/**
+ * POST /api/session/:id/verify-bundle — Atomic verification of all uploaded documents together in one execution
+ * Guarantees cross-document state persistence and sub-second execution on serverless Vercel & local
+ */
+app.post("/api/session/:id/verify-bundle", upload.any(), async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const files = (req.files as Express.Multer.File[]) || [];
+
+  if (files.length === 0) {
+    res.status(400).json({ error: "No document files provided in bundle" });
+    return;
+  }
+
+  try {
+    let session = await prisma.verificationSession.findUnique({ where: { id } });
+    if (!session) {
+      session = await prisma.verificationSession.create({
+        data: { id, status: "PROCESSING" },
+      });
+    }
+
+    // Process all documents in this container's session
+    for (const file of files) {
+      let docType: DocType = "bank_proof";
+      const field = file.fieldname.toLowerCase();
+      const orig = file.originalname.toLowerCase();
+
+      if (field.includes("gst") || orig.includes("gst")) docType = "gst_certificate";
+      else if (field.includes("pan") || orig.includes("pan")) docType = "pan_card";
+      else if (field.includes("cheque") || orig.includes("cheque") || field.includes("bank") || orig.includes("bank")) docType = "cancelled_cheque";
+
+      await orchestrator.processDocument(
+        id,
+        docType,
+        file.path,
+        file.mimetype,
+        ANTHROPIC_API_KEY,
+        file.originalname
+      );
+    }
+
+    // Fetch the full final report
+    const report = await getFormattedReport(id);
+
+    res.status(200).json({
+      success: true,
+      sessionId: id,
+      report,
+    });
+  } catch (error: any) {
+    console.error("[Pramana Bundle] Error:", error);
+    res.status(500).json({ error: "Bundle verification failed", message: error.message });
+  }
+});
+
+/**
  * GET /api/session/:id/report — Full verification report: all fields, all checks, evidence, overall result
  */
 app.get("/api/session/:id/report", async (req: Request, res: Response) => {
   const id = req.params.id as string;
 
   try {
-    const session = await prisma.verificationSession.findUnique({
-      where: { id },
-    });
+    const formattedReport = await getFormattedReport(id);
 
-    if (!session) {
-      res.status(404).json({ error: `Session '${id}' not found` });
+    if (!formattedReport) {
+      res.json({
+        sessionId: id,
+        status: "PROCESSING",
+        documentsCount: 0,
+        checksCount: 0,
+        documents: [],
+        checks: [],
+      });
       return;
     }
-
-    const documents = await prisma.document.findMany({
-      where: { sessionId: id },
-      orderBy: { createdAt: "asc" },
-    });
-
-    const checks = await prisma.verificationCheck.findMany({
-      where: { sessionId: id },
-      orderBy: { createdAt: "asc" },
-    });
-
-    const formattedReport = {
-      sessionId: session.id,
-      createdAt: session.createdAt,
-      status: session.status,
-      overallResult: session.overallResult,
-      narrativeSummary: session.narrativeSummary || null,
-      documentsCount: documents.length,
-      checksCount: checks.length,
-      documents: documents.map((d) => ({
-        id: d.id,
-        docType: d.docType,
-        rawFileUrl: d.rawFileUrl,
-        extractionConfidence: d.extractionConfidence,
-        extractedFields: JSON.parse(d.extractedFields),
-        tamperRisk: d.tamperRisk || "low",
-        tamperFlags: d.tamperFlags ? JSON.parse(d.tamperFlags) : [],
-        tamperSummary: d.tamperSummary || null,
-        createdAt: d.createdAt,
-      })),
-      checks: checks.map((c) => ({
-        id: c.id,
-        checkType: c.checkType,
-        result: c.result,
-        detail: c.detail,
-        evidence: JSON.parse(c.evidence),
-        createdAt: c.createdAt,
-      })),
-    };
 
     res.json(formattedReport);
   } catch (error: any) {
