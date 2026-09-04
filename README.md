@@ -9,58 +9,58 @@
 Pramana enforces a strict separation of concerns: **Vision AI is used strictly for extraction, while verification relies entirely on deterministic statutory math, live public banking rails, and forensic tamper analysis.**
 
 ```
-                           [ Uploaded Documents ]
-                    (GST REG-06, PAN Card, Bank Cheque)
-                                     │
-                                     ▼
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │ STAGE 01: Multi-Engine Document Extraction                              │
-  │ • Claude 3.5 Sonnet Vision (primary) with local Tesseract.js fallback   │
-  │ • Extracts structured entity data: GSTIN, PAN, IFSC, Account, Names     │
-  │ • Emits honest visual quality, completeness, and confidence scores      │
-  └─────────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │ STAGE 02: Structural & Statutory Validation (Pure Deterministic Math)  │
-  │ • GSTIN ⇄ PAN Match: Chars 3–12 of GSTIN slice-compared against PAN    │
-  │ • GSTIN Modulo-36 Checksum: ISO/IEC 7064 algorithm recalculates 15th    │
-  │   check character to catch typing errors and fake generated numbers     │
-  │ • PAN Format Validation: Entity-type character verification ([A-Z]{5})  │
-  └─────────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │ STAGE 03: Live Banking Clearing Verification (External Public Registry) │
-  │ • Live HTTPS query to Razorpay IFSC clearing directory                  │
-  │ • Verifies bank existence, physical branch address, and MICR code       │
-  │ • Confirms active transfer rails: NEFT, RTGS, IMPS, UPI                 │
-  │ • Deterministic HTTP 404 flags fake, dissolved, or merged bank codes    │
-  └─────────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │ STAGE 04: Semantic Legal Entity Name Reconciliation                    │
-  │ • Normalizes legal entity tokens ("Pvt Ltd" ↔ "Private Limited", "M/S") │
-  │ • Calculates Jaro-Winkler string distance and Token Sort Ratios         │
-  │ • Cross-reconciles GST Legal Name, Trade Name, PAN Name, & Cheque Name │
-  └─────────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │ STAGE 05: Internal Typography & Pixel Forensics                         │
-  │ • Analyzes EXIF metadata for editing signatures (Photoshop, Canva, GIMP)│
-  │ • Error Level Analysis (ELA) and character baseline anti-aliasing       │
-  │ • Surfaces clean, suspicious, or high-risk localized anomaly tags       │
-  └─────────────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │ STAGE 06: Underwriter Narrative Synthesis & Real-Time RAG Copilot       │
-  │ • Synthesizes all 5 upstream evidence stages into a plain-language memo │
-  │ • Outputs unambiguous recommendations: APPROVE, AUDIT_FLAG, or REJECT   │
-  │ • Real-time vector retrieval (RAG) allows underwriters to query docs    │
-  └─────────────────────────────────────────────────────────────────────────┘
+                             [ Uploaded Documents ]
+                      (GST REG-06, PAN Card, Bank Cheque)
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 01: Multi-Engine Document Extraction                                  │
+│ - Claude 3.5 Sonnet Vision (primary) with local Tesseract.js fallback       │
+│ - Extracts structured entity data: GSTIN, PAN, IFSC, Account, Names         │
+│ - Emits honest visual quality, completeness, and confidence scores          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 02: Structural & Statutory Validation (Pure Deterministic Math)       │
+│ - GSTIN <-> PAN Match: Chars 3-12 of GSTIN slice-compared against PAN       │
+│ - GSTIN Modulo-36 Checksum: ISO/IEC 7064 algorithm recalculates 15th        │
+│   check character to catch typing errors and fake generated numbers         │
+│ - PAN Format Validation: Entity-type character verification ([A-Z]{5})      │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 03: Live Banking Clearing Verification (External Public Registry)     │
+│ - Live HTTPS query to Razorpay IFSC clearing directory                      │
+│ - Verifies bank existence, physical branch address, and MICR code           │
+│ - Confirms active transfer rails: NEFT, RTGS, IMPS, UPI                     │
+│ - Deterministic HTTP 404 flags fake, dissolved, or merged bank codes        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 04: Semantic Legal Entity Name Reconciliation                         │
+│ - Normalizes legal entity tokens ("Pvt Ltd" <-> "Private Limited", "M/S")   │
+│ - Calculates Jaro-Winkler string distance and Token Sort Ratios             │
+│ - Cross-reconciles GST Legal Name, Trade Name, PAN Name, & Cheque Name      │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 05: Internal Typography & Pixel Forensics                             │
+│ - Analyzes EXIF metadata for editing signatures (Photoshop, Canva, GIMP)    │
+│ - Error Level Analysis (ELA) and character baseline anti-aliasing           │
+│ - Surfaces clean, suspicious, or high-risk localized anomaly tags           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 06: Underwriter Narrative Synthesis & Real-Time RAG Copilot           │
+│ - Synthesizes all 5 upstream evidence stages into a plain-language memo     │
+│ - Outputs unambiguous recommendations: APPROVE, AUDIT_FLAG, or REJECT       │
+│ - Real-time vector retrieval (RAG) allows underwriters to query docs        │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
