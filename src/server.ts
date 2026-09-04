@@ -17,7 +17,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const JWT_SECRET = process.env.JWT_SECRET || "pramana_merchants_secret_2026";
+const JWT_SECRET = process.env.JWT_SECRET || "nirnay_merchants_secret_2026";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -65,7 +65,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   try {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
   } catch (e) {
-    console.warn("[Pramana] Could not create uploads dir:", e);
+    console.warn("[Nirnay] Could not create uploads dir:", e);
   }
 }
 
@@ -94,7 +94,7 @@ app.use(async (_req: Request, _res: Response, next: () => void) => {
   try {
     await initDb();
   } catch (err) {
-    console.error("[Pramana] Database initialization error:", err);
+    console.error("[Nirnay] Database initialization error:", err);
   }
   next();
 });
@@ -109,7 +109,7 @@ app.use("/uploads", express.static(UPLOADS_DIR));
 app.get("/api", (_req: Request, res: Response) => {
   res.json({
     status: "healthy",
-    service: "Pramana KYB Verification Agent",
+    service: "Nirnay KYB Verification Agent",
     version: "1.0.0",
     claudeVisionAvailable: Boolean(ANTHROPIC_API_KEY),
     endpoints: {
@@ -132,7 +132,7 @@ app.get("/api", (_req: Request, res: Response) => {
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({
     status: "healthy",
-    service: "Pramana KYB Verification Agent",
+    service: "Nirnay KYB Verification Agent",
     timestamp: new Date().toISOString(),
     claudeVisionAvailable: Boolean(ANTHROPIC_API_KEY),
   });
@@ -160,7 +160,7 @@ interface MerchantRecord {
   plainPassword?: string;
 }
 
-const MERCHANTS_STORE_PATH = path.join("/tmp", "pramana_merchants.json");
+const MERCHANTS_STORE_PATH = path.join("/tmp", "nirnay_merchants.json");
 const GLOBAL_MERCHANTS = new Map<string, MerchantRecord>();
 
 function loadMerchantsStore() {
@@ -190,9 +190,44 @@ function saveMerchantToStore(merchant: MerchantRecord) {
 
 loadMerchantsStore();
 
+const REPORTS_STORE_PATH = path.join("/tmp", "pramana_reports.json");
+const GLOBAL_REPORTS = new Map<string, any>();
+
+function loadReportsStore() {
+  try {
+    if (fs.existsSync(REPORTS_STORE_PATH)) {
+      const data = JSON.parse(fs.readFileSync(REPORTS_STORE_PATH, "utf-8"));
+      if (Array.isArray(data)) {
+        for (const r of data) {
+          if (r && (r.sessionId || r.id)) {
+            GLOBAL_REPORTS.set(r.sessionId || r.id, r);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    // Non-fatal fallback
+  }
+}
+
+function saveReportToStore(report: any) {
+  if (!report) return;
+  const id = report.sessionId || report.id;
+  if (!id) return;
+  GLOBAL_REPORTS.set(id, report);
+  try {
+    const list = Array.from(GLOBAL_REPORTS.values());
+    fs.writeFileSync(REPORTS_STORE_PATH, JSON.stringify(list, null, 2), "utf-8");
+  } catch (err) {
+    // Non-fatal on ephemeral environments
+  }
+}
+
+loadReportsStore();
+
 const PRE_SEEDED_ACCOUNTS = [
   {
-    email: "demo@pramana.ai",
+    email: "demo@nirnay.ai",
     passwords: ["pramana2026", "demo123", "password", "123456"],
     fullName: "Aravind Sharma",
     businessName: "Acme Infotech Private Limited",
@@ -212,10 +247,10 @@ const PRE_SEEDED_ACCOUNTS = [
     state: "Maharashtra",
   },
   {
-    email: "admin@pramana.ai",
+    email: "admin@nirnay.ai",
     passwords: ["pramana2026", "admin123", "123456"],
     fullName: "Lead Underwriter",
-    businessName: "Pramana Risk Intelligence",
+    businessName: "Nirnay Risk Intelligence",
     businessType: "private_limited",
     phone: "9820000000",
     city: "Bengaluru",
@@ -638,7 +673,7 @@ async function resolveValidUserId(req: AuthenticatedRequest): Promise<string | n
       });
     }
   } catch (err) {
-    console.warn("[Pramana] User resolution safe fallback to anonymous session:", err);
+    console.warn("[Nirnay] User resolution safe fallback to anonymous session:", err);
   }
   return null;
 }
@@ -662,7 +697,7 @@ app.post("/api/session", optionalAuthMiddleware, async (req: AuthenticatedReques
       createdAt: session.createdAt,
     });
   } catch (error: any) {
-    console.error("[Pramana Session] Creation error:", error);
+    console.error("[Nirnay Session] Creation error:", error);
     res.status(500).json({ error: "Failed to create verification session", message: error.message });
   }
 });
@@ -861,6 +896,9 @@ app.post("/api/session/:id/verify-bundle", upload.any(), async (req: Request, re
 
     // Fetch the full final report
     const report = await getFormattedReport(id);
+    if (report) {
+      saveReportToStore(report);
+    }
 
     res.status(200).json({
       success: true,
@@ -868,7 +906,7 @@ app.post("/api/session/:id/verify-bundle", upload.any(), async (req: Request, re
       report,
     });
   } catch (error: any) {
-    console.error("[Pramana Bundle] Error:", error);
+    console.error("[Nirnay Bundle] Error:", error);
     res.status(500).json({ error: "Bundle verification failed", message: error.message });
   }
 });
@@ -880,7 +918,10 @@ app.get("/api/session/:id/report", async (req: Request, res: Response) => {
   const id = req.params.id as string;
 
   try {
-    const formattedReport = await getFormattedReport(id);
+    let formattedReport = await getFormattedReport(id);
+    if (!formattedReport && GLOBAL_REPORTS.has(id)) {
+      formattedReport = GLOBAL_REPORTS.get(id);
+    }
 
     if (!formattedReport) {
       res.json({
@@ -932,7 +973,7 @@ app.get("/api/session/:id/narrative", async (req: Request, res: Response) => {
  */
 app.post("/api/session/:id/ask", async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const { question } = req.body;
+  const { question, report: clientReport, sessionContext } = req.body;
 
   if (!question || typeof question !== "string" || !question.trim()) {
     res.status(400).json({ error: "Missing or invalid 'question' in request body" });
@@ -940,20 +981,81 @@ app.post("/api/session/:id/ask", async (req: Request, res: Response) => {
   }
 
   try {
-    const session = await prisma.verificationSession.findUnique({
-      where: { id },
-      include: {
-        documents: true,
-        checks: true,
-      },
-    });
+    let session: any = null;
+
+    // 1. Check local SQLite DB
+    try {
+      session = await prisma.verificationSession.findUnique({
+        where: { id },
+        include: {
+          documents: true,
+          checks: true,
+        },
+      });
+    } catch (dbErr) {
+      // Non-fatal, proceed to cache / payload fallbacks
+    }
+
+    // 2. Check local in-memory or persisted reports cache
+    if (!session && GLOBAL_REPORTS.has(id)) {
+      const cached = GLOBAL_REPORTS.get(id);
+      session = {
+        id,
+        status: cached.status || "COMPLETED",
+        overallResult: cached.overallResult || "PASSED",
+        narrativeSummary: cached.narrativeSummary || null,
+        documents: (cached.documents || []).map((d: any) => ({
+          id: d.id,
+          docType: d.docType,
+          rawFileUrl: d.rawFileUrl || "",
+          extractedFields: typeof d.extractedFields === "string" ? d.extractedFields : JSON.stringify(d.extractedFields || {}),
+          extractionConfidence: d.extractionConfidence ?? 0.95,
+        })),
+        checks: (cached.checks || []).map((c: any) => ({
+          id: c.id,
+          checkType: c.checkType || c.type,
+          result: c.result,
+          detail: c.detail,
+          evidence: typeof c.evidence === "string" ? c.evidence : JSON.stringify(c.evidence || {}),
+        })),
+      };
+    }
+
+    // 3. Client report payload fallback (guarantees zero 404s across Vercel serverless microVM container splits)
+    const reportData = clientReport || sessionContext;
+    if (!session && reportData && (reportData.documents || reportData.checks)) {
+      const r = reportData;
+      session = {
+        id,
+        status: r.status || "COMPLETED",
+        overallResult: r.overallResult || "PASSED",
+        narrativeSummary: r.narrativeSummary || null,
+        documents: (r.documents || []).map((d: any, idx: number) => ({
+          id: d.id || `doc-${idx}`,
+          docType: d.docType,
+          rawFileUrl: d.rawFileUrl || d.fileUrl || "",
+          extractedFields: typeof d.extractedFields === "string" ? d.extractedFields : JSON.stringify(d.extractedFields || {}),
+          extractionConfidence: d.extractionConfidence ?? 0.95,
+        })),
+        checks: (r.checks || []).map((c: any, idx: number) => ({
+          id: c.id || `chk-${idx}`,
+          checkType: c.checkType || c.type,
+          result: c.result,
+          detail: c.detail,
+          evidence: typeof c.evidence === "string" ? c.evidence : JSON.stringify(c.evidence || {}),
+        })),
+      };
+
+      // Cache for future requests in this container
+      saveReportToStore(r);
+    }
 
     if (!session) {
-      res.status(404).json({ error: `Session '${id}' not found` });
+      res.status(404).json({ error: `Session '${id}' not found. Please upload documents first.` });
       return;
     }
 
-    if (session.documents.length === 0) {
+    if (!session.documents || session.documents.length === 0) {
       res.status(400).json({
         error: "No documents found in this verification session. Please upload documents first.",
       });
@@ -1066,7 +1168,7 @@ export async function startServer() {
   await initDb();
   return app.listen(PORT, () => {
     console.log(`\n======================================================`);
-    console.log(`🛡️  Pramana KYB Document Verification Agent active`);
+    console.log(`🛡️  Nirnay KYB Document Verification Agent active`);
     console.log(`   Port: ${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/api/health`);
     console.log(`   Scenarios: http://localhost:${PORT}/api/demo/scenarios`);

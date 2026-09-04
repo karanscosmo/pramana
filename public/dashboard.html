@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Merchant Dashboard — Pramana (प्रमाण)</title>
+  <title>Merchant Dashboard — Nirnay (प्रमाण)</title>
   <meta name="description" content="Personal merchant verification dashboard. View document verification history, fraud prevention metrics, and audit evidence trails.">
   <link rel="stylesheet" href="styles.css">
   <style>
@@ -385,7 +385,7 @@
         <path d="M34 50 L45 61 L68 38" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
       <div class="brand-title">
-        Pramana
+        Nirnay
         <span class="brand-sanskrit">प्रमाण</span>
       </div>
     </a>
@@ -509,7 +509,7 @@
           </div>
           <h4 class="empty-title">No verifications yet</h4>
           <p class="empty-desc">
-            Your verification ledger is completely clean. Click below to run your first document set through Pramana's autonomous 4-agent pipeline.
+            Your verification ledger is completely clean. Click below to run your first document set through Nirnay's autonomous 4-agent pipeline.
           </p>
           <a href="/verify.html" class="dash-action-btn">
             <span>Verify First Merchant</span>
@@ -575,15 +575,15 @@
   <script type="module">
     import { formatCertificateHTML, downloadCertificateDocx } from "/scripts/certificate.js";
 
-    const token = localStorage.getItem('pramana_token');
+    const token = localStorage.getItem('nirnay_token');
     if (!token) {
       window.location.href = '/login.html';
     }
 
     // Logout
     document.getElementById('nav-logout-btn').addEventListener('click', () => {
-      localStorage.removeItem('pramana_token');
-      localStorage.removeItem('pramana_user');
+      localStorage.removeItem('nirnay_token');
+      localStorage.removeItem('nirnay_user');
       window.location.href = '/login.html';
     });
 
@@ -608,7 +608,7 @@
         });
 
         if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem('pramana_token');
+          localStorage.removeItem('nirnay_token');
           window.location.href = '/login.html';
           return;
         }

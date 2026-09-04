@@ -1,6 +1,6 @@
 export const API = {
   getAuthHeaders() {
-    const token = localStorage.getItem('pramana_token');
+    const token = localStorage.getItem('nirnay_token');
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   },
 
@@ -31,7 +31,7 @@ export const API = {
 
     // If session creation failed with stored token (e.g. stale user on newly rotated serverless container), retry cleanly
     if (!res.ok && this.getToken()) {
-      console.warn("[Pramana API] Session creation failed with token, retrying clean anonymous session...");
+      console.warn("[Nirnay API] Session creation failed with token, retrying clean anonymous session...");
       res = await fetch('/api/session', {
         method: 'POST',
         headers: {
@@ -102,18 +102,25 @@ export const API = {
     return res.json();
   },
 
-  async askAgent(sessionId, question) {
+  async askAgent(sessionId, question, report = null) {
+    let reportPayload = report;
+    if (!reportPayload && typeof window !== 'undefined') {
+      reportPayload = window.lastVerificationReport || (function() {
+        try { return JSON.parse(sessionStorage.getItem("pramana_last_report") || "null"); } catch(e) { return null; }
+      })();
+    }
+
     const res = await fetch(`/api/session/${sessionId}/ask`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...this.getAuthHeaders()
       },
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, report: reportPayload }),
     });
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || 'Failed to query RAG agent');
+      throw new Error(err.error || 'Failed to query Bodh');
     }
     return res.json();
   },

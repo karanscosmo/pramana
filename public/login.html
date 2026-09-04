@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Log In — Pramana (प्रमाण) Merchant Verification</title>
-  <meta name="description" content="Sign in to your Pramana merchant dashboard to view real-time document verification records and audit logs.">
+  <title>Log In — Nirnay (प्रमाण) Merchant Verification</title>
+  <meta name="description" content="Sign in to your Nirnay merchant dashboard to view real-time document verification records and audit logs.">
   <link rel="stylesheet" href="styles.css">
   <style>
     body {
@@ -287,7 +287,7 @@
             <path d="M34 50 L45 61 L68 38" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <div style="font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600;">
-            Pramana <span style="font-family: var(--font-devanagari); font-weight: 400; color: var(--seal-emerald-light);">प्रमाण</span>
+            Nirnay <span style="font-family: var(--font-devanagari); font-weight: 400; color: var(--seal-emerald-light);">प्रमाण</span>
           </div>
         </a>
 
@@ -303,12 +303,12 @@
           <div class="auth-quote-text">
             "In fintech compliance, the model feeling confident is not acceptable. Only mathematical truth and live clearing matter."
           </div>
-          <div class="auth-quote-author">— PRAMANA ARCHITECTURAL PRINCIPLE</div>
+          <div class="auth-quote-author">— NIRNAY ARCHITECTURAL PRINCIPLE</div>
         </div>
       </div>
 
       <div class="auth-hero-footer">
-        © 2026 Pramana Technologies • Autonomous Business Document Verification
+        © 2026 Nirnay Technologies • Autonomous Business Document Verification
       </div>
     </aside>
 
@@ -346,7 +346,7 @@
         </form>
 
         <div style="margin-top: 1.25rem; padding: 0.75rem 1rem; background: rgba(52, 211, 153, 0.08); border: 1px dashed rgba(52, 211, 153, 0.3); border-radius: 8px; font-size: 0.8rem; color: #dedad2; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
-          <span>Quick Demo: <strong>demo@pramana.ai</strong> • <strong>pramana2026</strong></span>
+          <span>Quick Demo: <strong>demo@nirnay.ai</strong> • <strong>pramana2026</strong></span>
           <button type="button" id="btn-fill-demo" style="background: var(--seal-emerald); border: none; border-radius: 6px; padding: 0.3rem 0.65rem; font-size: 0.75rem; color: #fff; cursor: pointer; font-weight: 600; white-space: nowrap;">Auto-Fill</button>
         </div>
 
@@ -367,14 +367,14 @@
     const passwordInput = document.getElementById('password');
 
     // Auto-fill last registered email if present
-    const lastEmail = localStorage.getItem('pramana_last_email');
+    const lastEmail = localStorage.getItem('nirnay_last_email');
     if (lastEmail) {
       emailInput.value = lastEmail;
       passwordInput.focus();
     }
 
     document.getElementById('btn-fill-demo')?.addEventListener('click', () => {
-      emailInput.value = 'demo@pramana.ai';
+      emailInput.value = 'demo@nirnay.ai';
       passwordInput.value = 'pramana2026';
       passwordInput.focus();
     });
@@ -417,9 +417,9 @@
           throw new Error(data.error || 'Invalid credentials');
         }
 
-        localStorage.setItem('pramana_token', data.token);
-        localStorage.setItem('pramana_user', JSON.stringify(data.user));
-        localStorage.setItem('pramana_last_email', email);
+        localStorage.setItem('nirnay_token', data.token);
+        localStorage.setItem('nirnay_user', JSON.stringify(data.user));
+        localStorage.setItem('nirnay_last_email', email);
 
         showAlert('Signed in successfully! Redirecting to dashboard...', 'success');
         setTimeout(() => {

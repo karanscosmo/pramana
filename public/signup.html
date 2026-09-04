@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up — Pramana (प्रमाण) Merchant Verification</title>
-  <meta name="description" content="Create your Pramana merchant account for autonomous, explainable business document verification and instant fraud detection.">
+  <title>Sign Up — Nirnay (प्रमाण) Merchant Verification</title>
+  <meta name="description" content="Create your Nirnay merchant account for autonomous, explainable business document verification and instant fraud detection.">
   <link rel="stylesheet" href="styles.css">
   <style>
     body {
@@ -313,7 +313,7 @@
             <path d="M34 50 L45 61 L68 38" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <div style="font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600;">
-            Pramana <span style="font-family: var(--font-devanagari); font-weight: 400; color: var(--seal-emerald-light);">प्रमाण</span>
+            Nirnay <span style="font-family: var(--font-devanagari); font-weight: 400; color: var(--seal-emerald-light);">प्रमाण</span>
           </div>
         </a>
 
@@ -348,7 +348,7 @@
       </div>
 
       <div class="auth-hero-footer">
-        © 2026 Pramana Technologies • Autonomous Business Document Verification
+        © 2026 Nirnay Technologies • Autonomous Business Document Verification
       </div>
     </aside>
 
@@ -648,8 +648,8 @@
         }
 
         // Store JWT token and user info
-        localStorage.setItem('pramana_token', data.token);
-        localStorage.setItem('pramana_user', JSON.stringify(data.user));
+        localStorage.setItem('nirnay_token', data.token);
+        localStorage.setItem('nirnay_user', JSON.stringify(data.user));
 
         // Cache account credentials for instant serverless re-hydration on login
         try {
@@ -659,7 +659,7 @@
             password: payload.password
           };
           localStorage.setItem('pramana_accounts', JSON.stringify(savedAccounts));
-          localStorage.setItem('pramana_last_email', payload.email);
+          localStorage.setItem('nirnay_last_email', payload.email);
         } catch (e) {
           // Non-fatal
         }

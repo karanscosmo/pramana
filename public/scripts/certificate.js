@@ -1,5 +1,5 @@
 /**
- * PRAMANA (प्रमाण) — OFFICIAL AUDIT CERTIFICATE & DOCUMENT EXPORTER
+ * NIRNAY (प्रमाण) — OFFICIAL AUDIT CERTIFICATE & DOCUMENT EXPORTER
  * Generates official compliance verification certificates with logo, seal, and Word (.doc) / PDF export.
  */
 
@@ -98,7 +98,7 @@ export function formatCertificateHTML(report) {
             </div>
             <div>
               <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: #0b664d; line-height: 1.1;">
-                PRAMANA <span style="font-size: 20px; font-weight: 400; color: #171614;">प्रमाण</span>
+                NIRNAY <span style="font-size: 20px; font-weight: 400; color: #171614;">प्रमाण</span>
               </div>
               <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5a5750; margin-top: 3px;">
                 Autonomous KYB Verification & Ground Truth Network
@@ -201,7 +201,7 @@ export function formatCertificateHTML(report) {
             </div>
           </div>
           <div style="text-align: right;">
-            <div style="font-weight: 700; color: #0b664d;">PRAMANA AUTONOMOUS ENGINE</div>
+            <div style="font-weight: 700; color: #0b664d;">NIRNAY AUTONOMOUS ENGINE</div>
             <div style="font-size: 10px; color: #8c887b;">Cryptographically Certified KYC/KYB Record</div>
           </div>
         </div>
@@ -243,7 +243,7 @@ export function downloadCertificateDocx(report) {
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
     <head>
       <meta charset='utf-8'>
-      <title>Pramana Verification Certificate</title>
+      <title>Nirnay Verification Certificate</title>
       <style>
         body { font-family: Arial, sans-serif; font-size: 12pt; color: #171614; }
         table { width: 100%; border-collapse: collapse; }
@@ -264,7 +264,7 @@ export function downloadCertificateDocx(report) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Pramana-Verification-Certificate-${certId}.doc`;
+  a.download = `Nirnay-Verification-Certificate-${certId}.doc`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

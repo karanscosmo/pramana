@@ -1,5 +1,5 @@
 /**
- * PRAMANA (प्रमाण) — CINEMATIC SCROLLING & PARALLAX ENGINE
+ * NIRNAY (प्रमाण) — CINEMATIC SCROLLING & PARALLAX ENGINE
  * Sticky-stage interpolation, pointer-reactive drift, and deterministic verification bench
  */
 
@@ -364,8 +364,8 @@
       title: "PAN matches GST Number",
       tag: "Official GST Council Rule • CGST Act Section 22",
       img: "/assets/pillar1-pan-gst.jpg",
-      summary: "By statutory Indian law, characters 3 through 12 of every 15-character GSTIN are exactly identical to the legal entity's 10-digit PAN. Pramana compares them directly with 0ms latency.",
-      mechanism: "Characters 1-2 denote the State Code (e.g. 27 for Maharashtra, 07 for Delhi). Characters 3-12 are strictly reserved for the Taxpayer's PAN (e.g. AAPFU0939F). Pramana extracts the PAN from the physical PAN card and the GSTIN from the GST Registration Certificate (Form GST REG-06), performing instant byte-for-byte slice matching without needing any internet connection.",
+      summary: "By statutory Indian law, characters 3 through 12 of every 15-character GSTIN are exactly identical to the legal entity's 10-digit PAN. Nirnay compares them directly with 0ms latency.",
+      mechanism: "Characters 1-2 denote the State Code (e.g. 27 for Maharashtra, 07 for Delhi). Characters 3-12 are strictly reserved for the Taxpayer's PAN (e.g. AAPFU0939F). Nirnay extracts the PAN from the physical PAN card and the GSTIN from the GST Registration Certificate (Form GST REG-06), performing instant byte-for-byte slice matching without needing any internet connection.",
       fraud: "Catches stolen, shell-company, or borrowed PAN cards; stops brokers who try to onboard a company using an unrelated director's PAN; catches multi-entity cross-collateralization scams where one business borrows credentials from another.",
       statutory: "Central Goods and Services Tax (CGST) Rules, 2017 (Rule 8) and Central Board of Indirect Taxes & Customs (CBIC) statutory format guidelines for GST identification numbers.",
       impact: "Provides 100% deterministic ground truth. If the PAN inside the GSTIN does not match the uploaded PAN card, the application is flagged immediately before any financial transactions or payouts occur."
@@ -379,15 +379,15 @@
       mechanism: "Characters 0-9 have values 0-9; letters A-Z map to values 10-35. The algorithm traverses all 14 characters with alternating weighting factors (1 and 2). If the calculated remainder does not match the 15th character, the GSTIN is mathematically impossible and cannot exist on the government GST portal.",
       fraud: "Instantly catches fake GST numbers invented by fraudsters, forged PDF certificates created with random numbers, keystroke typos made during onboarding, and AI-hallucinated fake certificates.",
       statutory: "GST Council Circular & GST Common Portal (GSTN) Schema Specifications (Rule 8(1) Form GST REG-01).",
-      impact: "Zero external dependencies. Pramana recalculates the 15th character in sub-millisecond time. Invalids are rejected on the spot before wasting API credits or risk underwriter time."
+      impact: "Zero external dependencies. Nirnay recalculates the 15th character in sub-millisecond time. Invalids are rejected on the spot before wasting API credits or risk underwriter time."
     },
     "3": {
       number: "PILLAR 03 • CLEARING REGISTRY",
       title: "Live Bank IFSC Search",
       tag: "Live Razorpay Bank Database • RBI RTGS/NEFT Rail",
       img: "/assets/pillar3-bank-ifsc.jpg",
-      summary: "Pramana checks the IFSC code on the cancelled cheque against Razorpay's live national bank directory, verifying the bank name, branch address, and transfer rail readiness.",
-      mechanism: "The first 4 letters represent the bank code (e.g., HDFC, SBIN). The 5th character is always '0'. The last 6 characters designate the physical branch. Pramana queries the live directory to fetch branch name, city, state, MICR code, and active transfer capabilities (NEFT, RTGS, IMPS, UPI).",
+      summary: "Nirnay checks the IFSC code on the cancelled cheque against Razorpay's live national bank directory, verifying the bank name, branch address, and transfer rail readiness.",
+      mechanism: "The first 4 letters represent the bank code (e.g., HDFC, SBIN). The 5th character is always '0'. The last 6 characters designate the physical branch. Nirnay queries the live directory to fetch branch name, city, state, MICR code, and active transfer capabilities (NEFT, RTGS, IMPS, UPI).",
       fraud: "Identifies dummy cheques printed with fictitious IFSC codes, discontinued cooperative banks, branches closed or merged due to bank consolidations, and accounts with no digital transfer capability.",
       statutory: "Reserve Bank of India (RBI) National Automated Clearing House (NACH) & Unified Payments Interface (UPI) branch clearing directories.",
       impact: "Ensures vendor payouts, loans, or merchant settlements will not bounce due to stale or invalid bank branch data, drastically reducing payment ops overhead."

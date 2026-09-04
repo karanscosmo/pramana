@@ -61,7 +61,7 @@ async function extractWithClaudeVision(
   const fileBuffer = fs.readFileSync(filePath);
   const base64Data = fileBuffer.toString("base64");
 
-  const systemPrompt = `You are Pramana's Document Extraction Agent, specialized in Indian KYB document parsing.
+  const systemPrompt = `You are Nirnay's Document Extraction Agent, specialized in Indian KYB document parsing.
 Extract all key fields with strict fidelity from this real uploaded document. Never hallucinate or infer missing numbers.
 Target Document Type: ${docTypeHint}
 

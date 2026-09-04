@@ -68,7 +68,7 @@ async function analyzeTamperWithClaudeVision(
   const validMediaTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
   const mediaType = validMediaTypes.includes(mimeType) ? (mimeType as any) : "image/jpeg";
 
-  const systemPrompt = `You are Pramana's Forensic Document Authenticity & Tamper Consistency Agent.
+  const systemPrompt = `You are Nirnay's Forensic Document Authenticity & Tamper Consistency Agent.
 Inspect this business onboarding document for signs of digital manipulation, image splicing, or post-scan typography alteration.
 Document Category: ${docType}
 

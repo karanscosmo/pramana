@@ -1147,6 +1147,21 @@
 
     // State
     let currentSessionId = null;
+    let lastReportData = null;
+    window.lastVerificationReport = null;
+    try {
+      const savedSess = sessionStorage.getItem("pramana_last_session_id");
+      const savedRep = sessionStorage.getItem("pramana_last_report");
+      if (savedSess) {
+        currentSessionId = savedSess;
+        const sessEl = document.getElementById("studio-session-id");
+        if (sessEl) sessEl.textContent = `Session: ${currentSessionId.slice(-8)}`;
+      }
+      if (savedRep) {
+        lastReportData = JSON.parse(savedRep);
+        window.lastVerificationReport = lastReportData;
+      }
+    } catch(e) {}
     let sseClient = null;
     let currentChecks = [];
     const selectedFiles = {
@@ -1270,6 +1285,12 @@
     // Progressive 6-Stage Renderer from Report
     async function applyVerificationReport(report) {
       if (!report) return;
+      lastReportData = report;
+      window.lastVerificationReport = report;
+      try {
+        sessionStorage.setItem("pramana_last_report", JSON.stringify(report));
+        if (currentSessionId) sessionStorage.setItem("pramana_last_session_id", currentSessionId);
+      } catch(e) {}
 
       // Stage 01: OCR Engine (Doc Reader)
       setStep("step-extraction", "passed");
@@ -1763,7 +1784,10 @@
       copilotChatBox.scrollTop = copilotChatBox.scrollHeight;
 
       try {
-        const response = await API.askAgent(currentSessionId, query);
+        const activeReport = lastReportData || window.lastVerificationReport || (function() {
+          try { return JSON.parse(sessionStorage.getItem("pramana_last_report") || "null"); } catch(e) { return null; }
+        })();
+        const response = await API.askAgent(currentSessionId, query, activeReport);
 
         let citationsHtml = "";
         if (response.citations && response.citations.length > 0) {
@@ -1805,7 +1829,7 @@
     }
 
     // Modal & Certificate Logic
-    let lastReportData = null;
+    // (lastReportData initialized at module scope)
     const modal = document.getElementById("audit-report-modal");
     const certContainer = document.getElementById("cert-view-container");
     const jsonContainer = document.getElementById("json-view-container");
