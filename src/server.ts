@@ -331,15 +331,49 @@ app.get("/api/user/dashboard", authMiddleware, async (req: AuthenticatedRequest,
   }
 });
 
+async function resolveValidUserId(req: AuthenticatedRequest): Promise<string | null> {
+  if (!req.user?.userId) return null;
+  try {
+    let user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: { id: true },
+    });
+    if (user) return user.id;
+
+    // In serverless environments, if a user holds a valid signed JWT but the ephemeral SQLite DB rotated, re-seed merchant record
+    if (req.user.email) {
+      user = await prisma.user.create({
+        data: {
+          id: req.user.userId,
+          email: req.user.email,
+          passwordHash: "serverless_session_token",
+          fullName: "Verified Merchant",
+          businessName: "Business Enterprise",
+          businessType: "sole_proprietorship",
+          phone: "9800000000",
+          city: "India",
+          state: "India",
+        },
+        select: { id: true },
+      });
+      return user.id;
+    }
+  } catch (err) {
+    console.warn("[Pramana] User resolution safe fallback to anonymous session:", err);
+  }
+  return null;
+}
+
 /**
  * POST /api/session — Create a new verification session (scoped to user if logged in)
  */
 app.post("/api/session", optionalAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const validUserId = await resolveValidUserId(req);
     const session = await prisma.verificationSession.create({
       data: {
         status: "PROCESSING",
-        userId: req.user?.userId || null,
+        userId: validUserId,
       },
     });
 
@@ -349,6 +383,7 @@ app.post("/api/session", optionalAuthMiddleware, async (req: AuthenticatedReques
       createdAt: session.createdAt,
     });
   } catch (error: any) {
+    console.error("[Pramana Session] Creation error:", error);
     res.status(500).json({ error: "Failed to create verification session", message: error.message });
   }
 });
@@ -646,10 +681,11 @@ app.post("/api/demo/run", optionalAuthMiddleware, async (req: AuthenticatedReque
   }
 
   try {
+    const validUserId = await resolveValidUserId(req);
     const session = await prisma.verificationSession.create({
       data: {
         status: "PROCESSING",
-        userId: req.user?.userId || null,
+        userId: validUserId,
       },
     });
 

@@ -21,16 +21,28 @@ export const API = {
   },
 
   async createSession() {
-    const res = await fetch('/api/session', {
+    let res = await fetch('/api/session', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...this.getAuthHeaders()
       },
     });
+
+    // If session creation failed with stored token (e.g. stale user on newly rotated serverless container), retry cleanly
+    if (!res.ok && this.getToken()) {
+      console.warn("[Pramana API] Session creation failed with token, retrying clean anonymous session...");
+      res = await fetch('/api/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+
     if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Failed to create session');
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || err.message || 'Failed to create session');
     }
     return res.json();
   },

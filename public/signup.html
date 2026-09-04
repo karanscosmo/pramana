@@ -417,12 +417,17 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="city">City</label>
-              <input type="text" id="city" class="form-input" placeholder="e.g. Mumbai" required>
+              <label class="form-label" for="state">State / Union Territory</label>
+              <select id="state" class="form-select" required>
+                <option value="" disabled selected>Select State / UT</option>
+              </select>
             </div>
             <div class="form-group">
-              <label class="form-label" for="state">State</label>
-              <input type="text" id="state" class="form-input" placeholder="e.g. Maharashtra" required>
+              <label class="form-label" for="city">City</label>
+              <select id="city" class="form-select" required disabled>
+                <option value="" disabled selected>Select State first</option>
+              </select>
+              <input type="text" id="customCity" class="form-input" placeholder="Type city/town name..." style="display:none; margin-top: 0.5rem;">
             </div>
           </div>
 
@@ -448,6 +453,95 @@
     const form = document.getElementById('signup-form');
     const alertBox = document.getElementById('auth-alert');
     const submitBtn = document.getElementById('submit-btn');
+    const stateSelect = document.getElementById('state');
+    const citySelect = document.getElementById('city');
+    const customCityInput = document.getElementById('customCity');
+
+    // Master dataset of all 36 Indian States/UTs with major cities
+    const INDIAN_STATES_AND_CITIES = {
+      "Andhra Pradesh": ["Anantapur", "Bhimavaram", "Chittoor", "Eluru", "Guntur", "Hindupur", "Kadapa", "Kakinada", "Kurnool", "Machilipatnam", "Nandyal", "Nellore", "Ongole", "Rajahmundry", "Tenali", "Tirupati", "Vijayawada", "Visakhapatnam", "Vizianagaram"],
+      "Arunachal Pradesh": ["Aalo", "Bomdila", "Itanagar", "Naharlagun", "Pasighat", "Roing", "Tawang", "Tezu", "Ziro"],
+      "Assam": ["Bongaigaon", "Dhubri", "Dibrugarh", "Diphu", "Guwahati", "Jorhat", "Karimganj", "Nagaon", "North Lakhimpur", "Silchar", "Sivasagar", "Tezpur", "Tinsukia"],
+      "Bihar": ["Arrah", "Begusarai", "Bhagalpur", "Bihar Sharif", "Chhapra", "Danapur", "Darbhanga", "Dehri", "Gaya", "Hajipur", "Katihar", "Motihari", "Munger", "Muzaffarpur", "Patna", "Purnia", "Saharsa", "Sasaram", "Siwan"],
+      "Chhattisgarh": ["Ambikapur", "Bhilai", "Bilaspur", "Dhamtari", "Durg", "Jagdalpur", "Korba", "Mahasamund", "Raigarh", "Raipur", "Rajnandgaon"],
+      "Goa": ["Bicholim", "Curchorem", "Mapusa", "Margao", "Panaji", "Ponda", "Vasco da Gama"],
+      "Gujarat": ["Ahmedabad", "Anand", "Bharuch", "Bhavnagar", "Bhuj", "Gandhinagar", "Godhra", "Jamnagar", "Junagadh", "Mehsana", "Morbi", "Navsari", "Palanpur", "Porbandar", "Rajkot", "Surat", "Surendranagar", "Vadodara", "Valsad", "Vapi"],
+      "Haryana": ["Ambala", "Bahadurgarh", "Bhiwani", "Faridabad", "Gurugram", "Hisar", "Jind", "Kaithal", "Karnal", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Thanesar", "Yamunanagar"],
+      "Himachal Pradesh": ["Baddi", "Bilaspur", "Chamba", "Dharamshala", "Hamirpur", "Kullu", "Manali", "Mandi", "Nahan", "Palampur", "Paonta Sahib", "Shimla", "Solan", "Una"],
+      "Jharkhand": ["Bokaro Steel City", "Chaibasa", "Chirkunda", "Deoghar", "Dhanbad", "Giridih", "Hazaribagh", "Jamshedpur", "Jhumri Telaiya", "Medininagar (Daltonganj)", "Phusro", "Ramgarh", "Ranchi"],
+      "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru", "Bidar", "Chikkamagaluru", "Chitradurga", "Davanagere", "Gadag", "Hassan", "Hospet", "Hubballi-Dharwad", "Kalaburagi", "Karwar", "Kolar", "Mandya", "Mangaluru", "Mysuru", "Raichur", "Ranebennur", "Shivamogga", "Tumakuru", "Udupi", "Vijayapura"],
+      "Kerala": ["Alappuzha", "Idukki", "Kannur", "Kasaragod", "Kochi", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Ponnani", "Thalassery", "Thiruvananthapuram", "Thrissur", "Vatakara", "Wayanad"],
+      "Madhya Pradesh": ["Bhind", "Bhopal", "Burhanpur", "Chhindwara", "Damoh", "Dewas", "Guna", "Gwalior", "Indore", "Jabalpur", "Katni", "Khandwa", "Ratlam", "Rewa", "Sagar", "Satna", "Shivpuri", "Singrauli", "Ujjain", "Vidisha"],
+      "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Chandrapur", "Chhatrapati Sambhajinagar", "Dhule", "Ichalkaranji", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mira-Bhayandar", "Mumbai", "Nagpur", "Nanded", "Nashik", "Navi Mumbai", "Panvel", "Parbhani", "Pune", "Ratnagiri", "Sangli", "Satara", "Solapur", "Thane", "Yavatmal"],
+      "Manipur": ["Bishnupur", "Churachandpur", "Imphal", "Kakching", "Senapati", "Thoubal", "Ukhrul"],
+      "Meghalaya": ["Baghmara", "Jowai", "Nongpoh", "Shillong", "Tura", "Williamnagar"],
+      "Mizoram": ["Aizawl", "Champhai", "Kolasib", "Lunglei", "Saiha", "Serchhip"],
+      "Nagaland": ["Dimapur", "Kohima", "Mokokchung", "Tuensang", "Wokha", "Zunheboto"],
+      "Odisha": ["Balasore", "Baripada", "Berhampur", "Bhadrak", "Bhubaneswar", "Bolangir", "Cuttack", "Jeypore", "Jharsuguda", "Puri", "Rayagada", "Rourkela", "Sambalpur"],
+      "Punjab": ["Abohar", "Amritsar", "Barnala", "Bathinda", "Firozpur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Khanna", "Ludhiana", "Moga", "Mohali (SAS Nagar)", "Muktsar", "Pathankot", "Patiala", "Phagwara", "Sangrur"],
+      "Rajasthan": ["Ajmer", "Alwar", "Beawar", "Bharatpur", "Bhilwara", "Bikaner", "Chittorgarh", "Churu", "Dholpur", "Hanumangarh", "Jaipur", "Jodhpur", "Kishangarh", "Kota", "Pali", "Sawai Madhopur", "Sikar", "Sri Ganganagar", "Udaipur"],
+      "Sikkim": ["Gangtok", "Geyzing", "Jorethang", "Mangan", "Namchi", "Rangpo"],
+      "Tamil Nadu": ["Chennai", "Coimbatore", "Cuddalore", "Dindigul", "Erode", "Hosur", "Kanchipuram", "Karur", "Kumbakonam", "Madurai", "Nagapattinam", "Nagercoil", "Neyveli", "Salem", "Thanjavur", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tiruppur", "Vellore"],
+      "Telangana": ["Adilabad", "Hyderabad", "Jagtial", "Karimnagar", "Khammam", "Mahbubnagar", "Mancherial", "Miryalaguda", "Nalgonda", "Nizamabad", "Ramagundam", "Siddipet", "Suryapet", "Warangal"],
+      "Tripura": ["Agartala", "Belonia", "Dharmanagar", "Kailashahar", "Khowai", "Udaipur"],
+      "Uttar Pradesh": ["Agra", "Aligarh", "Ayodhya", "Bareilly", "Budaun", "Etawah", "Farrukhabad", "Firozabad", "Ghaziabad", "Gorakhpur", "Greater Noida", "Hapur", "Jhansi", "Kanpur", "Lucknow", "Mathura", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Noida", "Prayagraj", "Rampur", "Saharanpur", "Shahjahanpur", "Varanasi"],
+      "Uttarakhand": ["Almora", "Dehradun", "Haldwani", "Haridwar", "Kashipur", "Mussoorie", "Nainital", "Pithoragarh", "Rishikesh", "Roorkee", "Rudrapur"],
+      "West Bengal": ["Asansol", "Baharampur", "Bardhaman", "Dankuni", "Darjeeling", "Durgapur", "Habra", "Haldia", "Howrah", "Jalpaiguri", "Kharagpur", "Kolkata", "Malda", "Raiganj", "Ranaghat", "Shantipur", "Siliguri"],
+      "Andaman and Nicobar Islands": ["Diglipur", "Mayabunder", "Port Blair", "Rangat"],
+      "Chandigarh": ["Chandigarh"],
+      "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa"],
+      "Delhi (NCT)": ["Central Delhi", "Connaught Place", "Dwarka", "East Delhi", "Janakpuri", "Karol Bagh", "New Delhi", "North Delhi", "Rohini", "Saket", "South Delhi", "Vasant Kunj", "West Delhi"],
+      "Jammu and Kashmir": ["Anantnag", "Baramulla", "Jammu", "Kathua", "Poonch", "Rajouri", "Sopore", "Srinagar", "Udhampur"],
+      "Ladakh": ["Kargil", "Leh"],
+      "Lakshadweep": ["Agatti", "Amini", "Andrott", "Kavaratti"],
+      "Puducherry": ["Karaikal", "Mahe", "Puducherry", "Yanam"]
+    };
+
+    // Populate States alphabetically
+    const sortedStates = Object.keys(INDIAN_STATES_AND_CITIES).sort();
+    sortedStates.forEach(state => {
+      const opt = document.createElement('option');
+      opt.value = state;
+      opt.textContent = state;
+      stateSelect.appendChild(opt);
+    });
+
+    // Populate Cities when State changes
+    stateSelect.addEventListener('change', function() {
+      const selectedState = this.value;
+      const cities = INDIAN_STATES_AND_CITIES[selectedState] || [];
+
+      citySelect.innerHTML = '<option value="" disabled selected>Select City</option>';
+      citySelect.disabled = false;
+
+      cities.forEach(city => {
+        const opt = document.createElement('option');
+        opt.value = city;
+        opt.textContent = city;
+        citySelect.appendChild(opt);
+      });
+
+      // Custom city option
+      const otherOpt = document.createElement('option');
+      otherOpt.value = '__custom__';
+      otherOpt.textContent = 'Other / Not Listed...';
+      citySelect.appendChild(otherOpt);
+
+      customCityInput.style.display = 'none';
+      customCityInput.required = false;
+      customCityInput.value = '';
+    });
+
+    citySelect.addEventListener('change', function() {
+      if (this.value === '__custom__') {
+        customCityInput.style.display = 'block';
+        customCityInput.required = true;
+        customCityInput.focus();
+      } else {
+        customCityInput.style.display = 'none';
+        customCityInput.required = false;
+      }
+    });
 
     function showAlert(msg, type = 'error') {
       alertBox.textContent = msg;
@@ -460,6 +554,11 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Creating Account...';
 
+      const stateVal = stateSelect.value;
+      const cityVal = citySelect.value === '__custom__' 
+        ? (customCityInput.value.trim() || 'Other') 
+        : citySelect.value;
+
       const payload = {
         fullName: document.getElementById('fullName').value.trim(),
         phone: document.getElementById('phone').value.trim(),
@@ -467,8 +566,8 @@
         password: document.getElementById('password').value,
         businessName: document.getElementById('businessName').value.trim(),
         businessType: document.getElementById('businessType').value,
-        city: document.getElementById('city').value.trim(),
-        state: document.getElementById('state').value.trim(),
+        city: cityVal,
+        state: stateVal,
       };
 
       try {
