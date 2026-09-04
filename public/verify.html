@@ -462,6 +462,9 @@
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
 
     .copilot-header {
@@ -542,18 +545,25 @@
       gap: 1rem;
       max-height: 420px;
       overflow-y: auto;
+      overflow-x: hidden;
       padding-right: 0.5rem;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .chat-bubble {
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
-      max-width: 90%;
+      max-width: 85%;
       border-radius: 12px;
       padding: 0.9rem 1.15rem;
       font-size: 0.9rem;
       line-height: 1.5;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      box-sizing: border-box;
     }
 
     .chat-bubble.user {
@@ -561,6 +571,10 @@
       background: var(--ink-primary);
       color: #ffffff;
       border-bottom-right-radius: 4px;
+      max-width: 85%;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      white-space: normal;
     }
 
     .chat-bubble.ai {
@@ -570,6 +584,10 @@
       color: var(--ink-primary);
       border-bottom-left-radius: 4px;
       width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     .citation-list {
@@ -579,6 +597,9 @@
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     .citation-item {
@@ -590,6 +611,11 @@
       border-radius: 6px;
       padding: 0.5rem 0.75rem;
       font-size: 0.78rem;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     .citation-source {
@@ -597,12 +623,18 @@
       font-weight: 700;
       color: var(--seal-emerald);
       font-size: 0.74rem;
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     .citation-snippet {
       color: var(--ink-muted);
       font-family: var(--font-mono);
       font-size: 0.74rem;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      line-height: 1.45;
     }
 
     .copilot-input-bar {

@@ -377,8 +377,14 @@
               <input type="text" id="fullName" class="form-input" placeholder="e.g. Aravind Sharma" required>
             </div>
             <div class="form-group">
-              <label class="form-label" for="phone">Mobile Number</label>
-              <input type="tel" id="phone" class="form-input" placeholder="e.g. 9820012345" maxlength="10" required>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="form-label" for="phone">Mobile Number (10 Digits)</label>
+                <span id="phone-count" class="mono" style="font-size: 0.72rem; color: var(--obsidian-muted);">10 digits required</span>
+              </div>
+              <div style="display: flex; gap: 0.45rem; align-items: center;">
+                <span style="background: #1e1c19; border: 1px solid var(--obsidian-border); border-radius: 8px; padding: 0.75rem 0.85rem; color: var(--seal-emerald-light); font-family: var(--font-mono); font-size: 0.88rem; font-weight: 700; user-select: none;">+91</span>
+                <input type="tel" id="phone" class="form-input" placeholder="9820012345" maxlength="10" required style="flex: 1;">
+              </div>
             </div>
           </div>
 
@@ -388,7 +394,10 @@
               <input type="email" id="email" class="form-input" placeholder="aravind@enterprises.in" required>
             </div>
             <div class="form-group">
-              <label class="form-label" for="password">Password (Min 6 chars)</label>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="form-label" for="password">Password (Min 6 chars)</label>
+                <span id="pw-count" class="mono" style="font-size: 0.72rem; color: var(--obsidian-muted);">Min 6 chars</span>
+              </div>
               <input type="password" id="password" class="form-input" placeholder="••••••••" minlength="6" required>
             </div>
           </div>
@@ -543,6 +552,46 @@
       }
     });
 
+    const phoneInput = document.getElementById('phone');
+    const phoneCount = document.getElementById('phone-count');
+    const passwordInput = document.getElementById('password');
+    const pwCount = document.getElementById('pw-count');
+
+    // Phone input live digit sanitizer & counter
+    phoneInput.addEventListener('input', function() {
+      let digits = this.value.replace(/\D/g, '');
+      if (digits.startsWith('91') && digits.length > 10) {
+        digits = digits.slice(2);
+      }
+      if (digits.startsWith('0') && digits.length > 10) {
+        digits = digits.slice(1);
+      }
+      if (digits.length > 10) {
+        digits = digits.slice(0, 10);
+      }
+      this.value = digits;
+
+      if (digits.length === 10) {
+        phoneCount.textContent = '✓ 10 digits';
+        phoneCount.style.color = '#34d399';
+      } else {
+        phoneCount.textContent = `${digits.length}/10 digits`;
+        phoneCount.style.color = digits.length > 0 ? '#f87171' : 'var(--obsidian-muted)';
+      }
+    });
+
+    // Password input live counter
+    passwordInput.addEventListener('input', function() {
+      const len = this.value.length;
+      if (len >= 6) {
+        pwCount.textContent = `✓ ${len} chars`;
+        pwCount.style.color = '#34d399';
+      } else {
+        pwCount.textContent = `${len}/6 chars (min 6)`;
+        pwCount.style.color = len > 0 ? '#f87171' : 'var(--obsidian-muted)';
+      }
+    });
+
     function showAlert(msg, type = 'error') {
       alertBox.textContent = msg;
       alertBox.className = `auth-alert ${type}`;
@@ -551,6 +600,21 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       alertBox.className = 'auth-alert';
+
+      const phoneVal = phoneInput.value.replace(/\D/g, '');
+      if (phoneVal.length !== 10) {
+        showAlert(`Please enter a valid 10-digit Indian mobile number (currently ${phoneVal.length} digits).`, 'error');
+        phoneInput.focus();
+        return;
+      }
+
+      const passwordVal = passwordInput.value;
+      if (!passwordVal || passwordVal.length < 6) {
+        showAlert(`Password must be at least 6 characters long (currently ${passwordVal ? passwordVal.length : 0} chars).`, 'error');
+        passwordInput.focus();
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtn.textContent = 'Creating Account...';
 
@@ -561,9 +625,9 @@
 
       const payload = {
         fullName: document.getElementById('fullName').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
+        phone: phoneVal,
         email: document.getElementById('email').value.trim().toLowerCase(),
-        password: document.getElementById('password').value,
+        password: passwordVal,
         businessName: document.getElementById('businessName').value.trim(),
         businessType: document.getElementById('businessType').value,
         city: cityVal,
@@ -586,6 +650,19 @@
         // Store JWT token and user info
         localStorage.setItem('pramana_token', data.token);
         localStorage.setItem('pramana_user', JSON.stringify(data.user));
+
+        // Cache account credentials for instant serverless re-hydration on login
+        try {
+          const savedAccounts = JSON.parse(localStorage.getItem('pramana_accounts') || '{}');
+          savedAccounts[payload.email] = {
+            ...data.user,
+            password: payload.password
+          };
+          localStorage.setItem('pramana_accounts', JSON.stringify(savedAccounts));
+          localStorage.setItem('pramana_last_email', payload.email);
+        } catch (e) {
+          // Non-fatal
+        }
 
         showAlert('Account created successfully! Redirecting to dashboard...', 'success');
         setTimeout(() => {

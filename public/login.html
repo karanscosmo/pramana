@@ -345,6 +345,11 @@
           </button>
         </form>
 
+        <div style="margin-top: 1.25rem; padding: 0.75rem 1rem; background: rgba(52, 211, 153, 0.08); border: 1px dashed rgba(52, 211, 153, 0.3); border-radius: 8px; font-size: 0.8rem; color: #dedad2; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+          <span>Quick Demo: <strong>demo@pramana.ai</strong> • <strong>pramana2026</strong></span>
+          <button type="button" id="btn-fill-demo" style="background: var(--seal-emerald); border: none; border-radius: 6px; padding: 0.3rem 0.65rem; font-size: 0.75rem; color: #fff; cursor: pointer; font-weight: 600; white-space: nowrap;">Auto-Fill</button>
+        </div>
+
         <div class="auth-foot-note">
           Don't have a merchant account? <a href="/signup.html" class="auth-foot-link">Create one in 2 minutes</a>
         </div>
@@ -358,6 +363,21 @@
     const form = document.getElementById('login-form');
     const alertBox = document.getElementById('auth-alert');
     const submitBtn = document.getElementById('submit-btn');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    // Auto-fill last registered email if present
+    const lastEmail = localStorage.getItem('pramana_last_email');
+    if (lastEmail) {
+      emailInput.value = lastEmail;
+      passwordInput.focus();
+    }
+
+    document.getElementById('btn-fill-demo')?.addEventListener('click', () => {
+      emailInput.value = 'demo@pramana.ai';
+      passwordInput.value = 'pramana2026';
+      passwordInput.focus();
+    });
 
     function showAlert(msg, type = 'error') {
       alertBox.textContent = msg;
@@ -370,14 +390,25 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Signing in...';
 
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const password = document.getElementById('password').value;
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      // Check if this browser has cached account data from signup
+      let cachedProfile = null;
+      try {
+        const savedAccounts = JSON.parse(localStorage.getItem('pramana_accounts') || '{}');
+        if (savedAccounts && savedAccounts[email]) {
+          cachedProfile = savedAccounts[email];
+        }
+      } catch (err) {
+        // Non-fatal
+      }
 
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email, password, cachedProfile })
         });
 
         const data = await res.json();
@@ -388,8 +419,9 @@
 
         localStorage.setItem('pramana_token', data.token);
         localStorage.setItem('pramana_user', JSON.stringify(data.user));
+        localStorage.setItem('pramana_last_email', email);
 
-        showAlert('Signed in successfully! Redirecting...', 'success');
+        showAlert('Signed in successfully! Redirecting to dashboard...', 'success');
         setTimeout(() => {
           window.location.href = '/dashboard.html';
         }, 500);
