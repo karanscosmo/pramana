@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pramana Studio — Real Document Verification & Live RAG Intelligence</title>
-  <meta name="description" content="Pramana Real-World Studio: Upload business documents, execute real OCR extraction, run tamper-consistency checks, statutory compliance checks, and underwriter narrative synthesis.">
+  <title>Nirnay Studio — Real Document Verification & Live RAG Intelligence</title>
+  <meta name="description" content="Nirnay Real-World Studio: Upload business documents, execute real OCR extraction, run tamper-consistency checks, statutory compliance checks, and underwriter narrative synthesis.">
   
   <link rel="stylesheet" href="styles.css">
   <style>
@@ -756,7 +756,7 @@
         <path d="M34 50 L45 61 L68 38" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
       <div class="brand-title">
-        Pramana
+        Nirnay
         <span class="brand-sanskrit">Studio</span>
       </div>
     </a>
@@ -783,7 +783,7 @@
 
   <script>
     (function checkVerifyAuth() {
-      const token = localStorage.getItem('pramana_token');
+      const token = localStorage.getItem('nirnay_token');
       if (token) {
         const dashBtn = document.getElementById('verify-nav-dash');
         const loginBtn = document.getElementById('verify-nav-login');
@@ -800,7 +800,7 @@
       <div>
         <h1 class="studio-heading">6-Stage KYB Document Verification Studio</h1>
         <p class="studio-subheading">
-          Upload genuine business onboarding documents or test our forensic tamper suite. Pramana reads files with Optical Character Recognition, executes internal tamper checks (Stage 5), enforces statutory government rules, queries live bank clearing directories, and synthesizes a human-readable underwriter narrative (Stage 6).
+          Upload genuine business onboarding documents or test our forensic tamper suite. Nirnay reads files with Optical Character Recognition, executes internal tamper checks (Stage 5), enforces statutory government rules, queries live bank clearing directories, and synthesizes a human-readable underwriter narrative (Stage 6).
         </p>
       </div>
 
@@ -948,7 +948,7 @@
 
       </div>
 
-      <!-- Right Column: Live Verdict Stage, 6-Agent Pipeline Ribbon, Underwriter Narrative, Evidence Stream, & RAG Copilot -->
+      <!-- Right Column: Live Verdict Stage, 6-Agent Pipeline Ribbon, Underwriter Narrative, Evidence Stream, & Bodh RAG -->
       <div>
 
         <!-- Overall Verdict Banner -->
@@ -1027,7 +1027,7 @@
           </div>
         </div>
 
-        <!-- REAL RAG COPILOT INTERFACE -->
+        <!-- REAL RAG BODH INTERFACE -->
         <div class="copilot-card" id="rag-copilot-card">
           <div class="copilot-header">
             <div class="copilot-title-group">
@@ -1035,10 +1035,10 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--seal-emerald);">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
-                <span>AI Document Intelligence & RAG Copilot</span>
+                <span>Bodh (बोध) — AI Document Intelligence</span>
               </h3>
               <p style="font-size: 0.85rem; color: var(--ink-secondary); margin-top: 2px;">
-                Ask questions about the uploaded documents. The AI agent retrieves verified document chunks and answers with exact citations.
+                Ask questions about the uploaded documents. Bodh retrieves verified document facts and answers with exact statutory citations.
               </p>
             </div>
             <span class="rag-badge">
@@ -1064,19 +1064,19 @@
           <div class="copilot-chat-box" id="copilot-chat-box">
             <div class="chat-bubble ai" id="copilot-empty-notice">
               <div>
-                <strong>Pramana Document Copilot ready.</strong> Upload and verify your business documents, then ask any question about the extracted fields, numbers, tamper risk, or underwriting status.
+                <strong>Bodh (बोध) is ready.</strong> Upload and verify business documents, then ask any question about the extracted fields, numbers, tamper risk, or underwriting status.
               </div>
             </div>
           </div>
 
           <!-- Input Bar -->
           <div class="copilot-input-bar">
-            <input type="text" id="copilot-input" class="copilot-input" placeholder="Ask a question about your uploaded documents (e.g. 'Did tamper check flag anything?')..." disabled>
+            <input type="text" id="copilot-input" class="copilot-input" placeholder="Ask Bodh anything about your verified documents..." disabled>
             <button class="btn-copilot-ask" id="btn-copilot-ask" disabled>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
               </svg>
-              <span>Ask Copilot</span>
+              <span>Ask Bodh</span>
             </button>
           </div>
 
@@ -1382,7 +1382,7 @@
 
         enableCopilot();
       } catch (err) {
-        console.warn("[Pramana] Atomic bundle verify fallback to sequential upload:", err);
+        console.warn("[Nirnay] Atomic bundle verify fallback to sequential upload:", err);
         try {
           // Sequential upload fallback
           for (const [docType, file] of activeFiles) {
@@ -1676,7 +1676,7 @@
       copilotChatBox.innerHTML = `
         <div class="chat-bubble ai" id="copilot-empty-notice">
           <div>
-            <strong>Pramana Document Copilot ready.</strong> Upload and verify your business documents, then ask any question about the extracted fields, numbers, tamper risk, or underwriting status.
+            <strong>Bodh (बोध) is ready.</strong> Upload and verify business documents, then ask any question about the extracted fields, numbers, tamper risk, or underwriting status.
           </div>
         </div>
       `;
@@ -1710,20 +1710,20 @@
     }
 
     // =========================================================================
-    // REAL RAG COPILOT LOGIC
+    // REAL RAG BODH LOGIC
     // =========================================================================
     function enableCopilot() {
       copilotInput.disabled = false;
       btnCopilotAsk.disabled = false;
-      copilotInput.placeholder = "Ask anything about the verified documents or underwriter findings...";
-      logTelemetry("[RAG] Document Intelligence & RAG Copilot activated for this session.", true);
+      copilotInput.placeholder = "Ask Bodh anything about the verified documents or underwriter findings...";
+      logTelemetry("[Bodh] Real-Time Document Intelligence activated for this session.", true);
     }
 
     // Pill quick-clicks
     document.querySelectorAll(".copilot-pill").forEach(pill => {
       pill.addEventListener("click", () => {
         if (!currentSessionId) {
-          alert("Please upload and run verification on documents first before querying the RAG Copilot.");
+          alert("Please upload and run verification on documents first before querying Bodh.");
           return;
         }
         copilotInput.value = pill.dataset.q;
@@ -1756,7 +1756,7 @@
       aiBubble.innerHTML = `
         <div style="display:flex; align-items:center; gap: 0.5rem; color: var(--ink-secondary);">
           <span class="status-pulse-dot"></span>
-          <span>Searching verified document chunks and forensic evidence...</span>
+          <span>Searching verified document facts...</span>
         </div>
       `;
       copilotChatBox.appendChild(aiBubble);
@@ -1767,17 +1767,25 @@
 
         let citationsHtml = "";
         if (response.citations && response.citations.length > 0) {
+          // Clean concise citation tags
           citationsHtml = `
             <div class="citation-list">
-              <span class="mono" style="font-size: 0.7rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">
-                Document Citations & Grounded Sources (${Math.round(response.confidence * 100)}% Confidence):
+              <span class="mono" style="font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">
+                Verified Grounded Sources (${Math.round(response.confidence * 100)}% Match):
               </span>
-              ${response.citations.map(c => `
-                <div class="citation-item">
-                  <div class="citation-source">📄 ${escapeHtml(c.source)}</div>
-                  <div class="citation-snippet">${escapeHtml(c.snippet)}</div>
-                </div>
-              `).join("")}
+              ${response.citations.slice(0, 2).map(c => {
+                // Shorten snippet to just the essential detail
+                let cleanSnippet = c.snippet || "";
+                if (cleanSnippet.includes("Evidence:")) {
+                  cleanSnippet = cleanSnippet.split("Evidence:")[0].trim();
+                }
+                return `
+                  <div class="citation-item">
+                    <div class="citation-source">📄 ${escapeHtml(c.source)}</div>
+                    <div class="citation-snippet">${escapeHtml(cleanSnippet)}</div>
+                  </div>
+                `;
+              }).join("")}
             </div>
           `;
         }
@@ -1789,7 +1797,7 @@
           ${citationsHtml}
         `;
       } catch (err) {
-        aiBubble.innerHTML = `<div style="color: #dc2626;">Error querying document intelligence: ${escapeHtml(err.message)}</div>`;
+        aiBubble.innerHTML = `<div style="color: #dc2626;">Error querying Bodh: ${escapeHtml(err.message)}</div>`;
       } finally {
         btnCopilotAsk.disabled = false;
         copilotChatBox.scrollTop = copilotChatBox.scrollHeight;

@@ -1,12 +1,12 @@
-# Pramana (प्रमाण) — Autonomous Business KYB Verification Agent
+# Nirnay (प्रमाण) — Autonomous Business KYB Verification Agent
 
-> **Plain-Language Summary**: When an Indian small business or merchant onboards onto a payment gateway, lender, or marketplace, compliance teams must manually cross-verify their GST Certificate, PAN Card, and Cancelled Bank Cheque. Pramana completely automates this: it extracts every key field via computer vision, runs statutory deterministic checks (Modulo-36 checksums, PAN slice matching), queries live public banking registries via Razorpay, inspects images for pixel and typography tampering, and synthesizes an audit-grade, human-readable underwriter memorandum ready for risk committees.
+> **Plain-Language Summary**: When an Indian small business or merchant onboards onto a payment gateway, lender, or marketplace, compliance teams must manually cross-verify their GST Certificate, PAN Card, and Cancelled Bank Cheque. Nirnay completely automates this: it extracts every key field via computer vision, runs statutory deterministic checks (Modulo-36 checksums, PAN slice matching), queries live public banking registries via Razorpay, inspects images for pixel and typography tampering, and synthesizes an audit-grade, human-readable underwriter memorandum ready for risk committees.
 
 ---
 
 ## 🏛️ Architecture & Verification Pipeline
 
-Pramana enforces a strict separation of concerns: **Vision AI is used strictly for extraction, while verification relies entirely on deterministic statutory math, live public banking rails, and forensic tamper analysis.**
+Nirnay enforces a strict separation of concerns: **Vision AI is used strictly for extraction, while verification relies entirely on deterministic statutory math, live public banking rails, and forensic tamper analysis.**
 
 ```
                              [ Uploaded Documents ]
@@ -56,10 +56,10 @@ Pramana enforces a strict separation of concerns: **Vision AI is used strictly f
                                        │
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ STAGE 06: Underwriter Narrative Synthesis & Real-Time RAG Copilot           │
+│ STAGE 06: Underwriter Narrative Synthesis & Bodh (बोध) Real-Time RAG        │
 │ - Synthesizes all 5 upstream evidence stages into a plain-language memo     │
 │ - Outputs unambiguous recommendations: APPROVE, AUDIT_FLAG, or REJECT       │
-│ - Real-time vector retrieval (RAG) allows underwriters to query docs        │
+│ - Real-time vector retrieval (Bodh) allows underwriters to query docs       │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -99,10 +99,10 @@ Open `.env`. All verification checks work locally **without any paid API keys**:
 ```env
 PORT=3001
 DATABASE_URL="file:./dev.db"
-JWT_SECRET="pramana_merchants_secret_2026"
+JWT_SECRET="nirnay_merchants_secret_2026"
 
 # Optional: Add your Anthropic key for Claude 3.5 Sonnet Vision extraction.
-# If omitted, Pramana automatically uses the local Tesseract.js OCR engine (100% free & offline).
+# If omitted, Nirnay automatically uses the local Tesseract.js OCR engine (100% free & offline).
 ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
@@ -130,7 +130,7 @@ Open [http://localhost:3001](http://localhost:3001) in your browser.
 
 ### 7. Deploy to Vercel (Fullstack Serverless)
 
-Pramana is pre-configured for zero-friction fullstack deployment on Vercel:
+Nirnay is pre-configured for zero-friction fullstack deployment on Vercel:
 
 1. **Option A: Vercel CLI**
    ```bash
@@ -189,14 +189,14 @@ The following metrics are collected from our actual automated test suite (`tests
 
 ---
 
-## 🏆 How Pramana Differs from Existing Tools (Signzy, HyperVerge, Karza)
+## 🏆 How Nirnay Differs from Existing Tools (Signzy, HyperVerge, Karza)
 
-| Capability | Legacy KYB Tools (Signzy / HyperVerge) | Pramana (प्रमाण) |
+| Capability | Legacy KYB Tools (Signzy / HyperVerge) | Nirnay (प्रमाण) |
 | :--- | :--- | :--- |
 | **Decision Transparency** | Black-box boolean status (`REJECTED_CODE_42`) | **Complete audit trail** displaying raw formulas, character slices, and clearing responses |
 | **Underwriting Output** | Raw JSON payloads requiring manual interpretation | **Plain-Language Underwriter Memorandum** written in risk officer vernacular |
 | **Deterministic Math** | Often relies entirely on cloud OCR text matches | **Local ISO/IEC 7064 Modulo-36 recalculation** and strict character slice verification |
-| **Interactive Interrogation** | Static report | **Real-time RAG Copilot**: underwriters can ask questions directly to the document store |
+| **Interactive Interrogation** | Static report | **Real-time RAG (Bodh)**: underwriters can ask questions directly to the document store |
 | **Air-Gapped Operation** | Requires external vendor API calls for every check | **Runs fully offline** with local Tesseract.js OCR and local deterministic rules |
 
 ---

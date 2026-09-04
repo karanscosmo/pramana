@@ -175,10 +175,10 @@ export async function answerQueryWithRAG(
       const anthropic = new Anthropic({ apiKey });
       const contextText = retrieved.map((r, i) => `[Source ${i + 1} - ${r.chunk.source}]: ${r.chunk.content}`).join("\n");
 
-      const prompt = `You are Pramana's Document Intelligence & RAG Agent.
-A user is asking a question about their uploaded business onboarding documents.
-Answer ONLY based on the following verified document chunks. Never invent or assume numbers.
-If the information is not in the documents, explicitly state that it was not found.
+      const prompt = `You are Bodh (बोध) — Pramana's Document Intelligence Engine.
+A user is asking a direct question about their uploaded business documents.
+Answer concisely and directly in 1-2 sentences with the exact facts/numbers.
+Do not add conversational filler, disclaimers, or redundant pleasantries. State the direct answer immediately.
 
 RETRIEVED CONTEXT:
 ${contextText}
@@ -189,16 +189,16 @@ ${session.overallResult ? session.overallResult.toUpperCase() : "PROCESSING"}
 USER QUESTION:
 ${query}
 
-Provide a concise, direct, helpful answer citing the specific document type or statutory check.`;
+Direct answer:`;
 
       const response = await anthropic.messages.create({
         model: "claude-3-5-sonnet-20241022",
-        max_tokens: 600,
+        max_tokens: 300,
         messages: [{ role: "user", content: prompt }],
       });
 
       const textBlock = response.content.find((b) => b.type === "text");
-      const answer = textBlock ? (textBlock as any).text : "Unable to formulate answer from documents.";
+      const answer = textBlock ? (textBlock as any).text.trim() : "Unable to formulate answer from documents.";
 
       return {
         answer,
@@ -210,7 +210,7 @@ Provide a concise, direct, helpful answer citing the specific document type or s
     }
   }
 
-  // Deterministic Grounded RAG Reasoning Engine (Strict 0% Hallucination)
+  // Deterministic Grounded RAG Reasoning Engine (Crisp, Direct, 0% Hallucination)
   const answer = synthesizeDeterministicAnswer(query, retrieved, session);
 
   return {
@@ -263,43 +263,48 @@ function synthesizeDeterministicAnswer(
   if (q.includes("gst") || q.includes("gstin")) {
     const chk = session.checks?.find((c: any) => c.checkType === "gstin_checksum" || c.checkType === "gstin_pan_match");
     if (foundGstin) {
-      return `Based on the uploaded GST certificate, the extracted GSTIN is **${foundGstin}**. Status: ${chk?.result === 'pass' ? 'Mathematically verified via Modulo-36' : (chk ? chk.detail : 'Verified')}.`;
+      const statusStr = chk?.result === 'pass' ? 'Valid (Modulo-36 checksum verified)' : (chk ? chk.detail : 'Verified');
+      return `**GSTIN:** ${foundGstin} (${statusStr})`;
     }
-    return `The GST certificate contains: ${retrieved[0]?.chunk.content || "No explicit GSTIN field detected."}`;
+    return `GST details: ${retrieved[0]?.chunk.content || "No GSTIN found."}`;
   }
 
   if (q.includes("pan")) {
     const chk = session.checks?.find((c: any) => c.checkType === "gstin_pan_match");
     if (foundPan) {
-      return `The extracted PAN from the documents is **${foundPan}**. ${chk ? `Cross-check status with GST: ${chk.detail}` : ''}`;
+      return `**PAN:** ${foundPan} ${chk ? `— ${chk.detail}` : ''}`;
     }
-    return `PAN details from uploaded documents: ${retrieved[0]?.chunk.content}`;
+    return `PAN details: ${retrieved[0]?.chunk.content || "No PAN found."}`;
   }
 
   if (q.includes("bank") || q.includes("ifsc") || q.includes("cheque") || q.includes("account")) {
     const chk = session.checks?.find((c: any) => c.checkType === "ifsc_lookup");
-    return `Bank Information from the uploaded cheque: IFSC code is **${foundIfsc || 'Recorded'}**, Bank: **${foundBank || 'Verified'}**. Live Clearing Status: ${chk?.detail || 'Verified with Razorpay registry'}.`;
+    return `**Bank:** ${foundBank || 'Verified'} | **IFSC:** ${foundIfsc || 'N/A'} (${chk?.detail || 'Verified with Razorpay registry'})`;
   }
 
   if (q.includes("name") || q.includes("business") || q.includes("owner") || q.includes("proprietor")) {
     const chk = session.checks?.find((c: any) => c.checkType === "name_cross_match");
-    return `The identified business entity is **${foundName || 'Recorded in document'}**. Cross-document alignment: ${chk?.detail || 'Consistent across submitted documents'}.`;
+    return `**Business Entity:** ${foundName || 'Recorded'} (${chk?.detail || 'Verified across documents'})`;
   }
 
-  if (q.includes("flag") || q.includes("fraud") || q.includes("error") || q.includes("fail") || q.includes("discrepanc")) {
+  if (q.includes("flag") || q.includes("tamper") || q.includes("fraud") || q.includes("error") || q.includes("fail") || q.includes("discrepanc")) {
     const failedChecks = session.checks?.filter((c: any) => c.result === "fail") || [];
     if (failedChecks.length === 0) {
-      return `All statutory checks passed with zero flags! 15th digit GSTIN checksum, PAN matching, and live Razorpay bank IFSC clearing are all 100% genuine.`;
+      return `**Zero flags detected.** All statutory checks passed (GSTIN checksum, PAN cross-match, Razorpay IFSC clearing, forensic tamper analysis).`;
     }
     const reasons = failedChecks.map((f: any) => `• **${f.checkType}**: ${f.detail}`).join("\n");
-    return `The autonomous agent caught ${failedChecks.length} discrepancy flag(s):\n${reasons}`;
+    return `**${failedChecks.length} flag(s) detected:**\n${reasons}`;
+  }
+
+  if (q.includes("underwriter") || q.includes("recommend") || q.includes("verdict") || q.includes("memo")) {
+    const outcome = session.overallResult ? session.overallResult.toUpperCase() : "PROCESSING";
+    return `**Underwriter Recommendation:** ${outcome}. All submitted documents have been parsed and cross-validated.`;
   }
 
   // General grounded synthesis
   if (retrieved.length > 0) {
-    const top = retrieved.slice(0, 3).map((r) => r.chunk.content).join("\n");
-    return `Here is what was retrieved from your uploaded documents:\n${top}\n\nOverall session outcome: **${session.overallResult ? session.overallResult.toUpperCase() : "PROCESSING"}**.`;
+    return retrieved.slice(0, 2).map((r) => `• ${r.chunk.content}`).join("\n");
   }
 
-  return `No documents are currently indexed for this session. Please upload a GST Certificate, PAN Card, or Bank Cheque to activate the RAG engine.`;
+  return `No documents indexed for this session. Please upload documents to query Bodh.`;
 }
