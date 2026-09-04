@@ -1252,6 +1252,77 @@
       updateVerdict("processing", "Running 6-Stage Verification Pipeline...", "Executing OCR, forensic tamper inspection, and statutory checks...");
       logTelemetry(`[START] Initializing live 6-stage verification session for ${activeFiles.length} uploaded document(s)...`, true);
 
+      let syncPollInterval = null;
+      let sessionFinished = false;
+
+      async function syncSessionState() {
+        if (!currentSessionId || sessionFinished) return;
+        try {
+          const report = await API.getReport(currentSessionId);
+          if (!report) return;
+
+          // If documents exist, advance Stage 1
+          if (report.documents && report.documents.length > 0) {
+            setStep("step-extraction", "passed");
+            setStep("step-tamper", "active");
+            for (const doc of report.documents) {
+              if (doc.tamperRisk) {
+                updateDocumentTamperCard(doc.docType, {
+                  evidence: { tamperRisk: doc.tamperRisk, flaggedRegions: doc.tamperFlags ? JSON.parse(doc.tamperFlags) : [] },
+                  detail: doc.tamperSummary || ""
+                });
+              }
+            }
+          }
+
+          // If checks exist, render check cards & advance pipeline steps
+          if (report.checks && report.checks.length > 0) {
+            for (const check of report.checks) {
+              const alreadyRendered = currentChecks.some(c => c.checkType === check.checkType);
+              if (!alreadyRendered) {
+                currentChecks.push(check);
+                renderCheckCard(check);
+
+                if (check.checkType === "tamper_consistency") {
+                  setStep("step-tamper", check.result === "pass" ? "passed" : "failed");
+                  setStep("step-structural", "active");
+                }
+                if (check.checkType === "gstin_checksum" || check.checkType === "gstin_pan_match" || check.checkType === "pan_format") {
+                  setStep("step-structural", check.result === "pass" ? "passed" : "failed");
+                  setStep("step-external", "active");
+                }
+                if (check.checkType === "ifsc_lookup") {
+                  setStep("step-external", check.result === "pass" ? "passed" : "failed");
+                  setStep("step-name", "active");
+                }
+                if (check.checkType === "name_cross_match") {
+                  setStep("step-name", check.result === "pass" ? "passed" : "failed");
+                  setStep("step-narrative", "active");
+                }
+              }
+            }
+          }
+
+          // If underwriter narrative exists
+          if (report.narrativeSummary) {
+            setStep("step-narrative", "passed");
+            underwriterMemoText.textContent = `"${report.narrativeSummary}"`;
+            leadUnderwriterCard.style.display = "block";
+          }
+
+          // If session completed
+          if (report.status === "COMPLETE") {
+            sessionFinished = true;
+            if (syncPollInterval) clearInterval(syncPollInterval);
+            handleComplete(report);
+            btnStart.disabled = false;
+            btnStart.innerHTML = `<span>Run 6-Stage Verification Pipeline</span>`;
+          }
+        } catch (e) {
+          console.warn("[Pramana] Sync error:", e);
+        }
+      }
+
       try {
         // Step 1: Create session
         const sessRes = await API.createSession();
@@ -1262,15 +1333,26 @@
         if (sseClient) sseClient.close();
         sseClient = new SSEManager(currentSessionId, handleMessage, (err) => console.warn("SSE error:", err));
 
+        // Start real-time sync polling so serverless execution never hangs on SSE
+        syncPollInterval = setInterval(syncSessionState, 1200);
+
         // Step 3: Upload and process files in sequence
         for (const [docType, file] of activeFiles) {
           logTelemetry(`[UPLOAD] Sending ${docType} (${file.name}) to pipeline...`);
           await API.uploadDocument(currentSessionId, docType, file);
+          logTelemetry(`[OCR] Processing complete for ${docType}`, true);
+          setStep("step-extraction", "passed");
+          setStep("step-tamper", "active");
+          await syncSessionState();
         }
+
+        // Final sync
+        await syncSessionState();
 
         // Enable RAG Copilot
         enableCopilot();
       } catch (err) {
+        if (syncPollInterval) clearInterval(syncPollInterval);
         updateVerdict("flagged", "Verification Error", err.message);
         logTelemetry(`[ERROR] ${err.message}`, true);
         btnStart.disabled = false;
