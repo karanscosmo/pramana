@@ -67,7 +67,8 @@ class VerificationOrchestrator {
     docType: DocType,
     filePath: string,
     mimeType: string,
-    apiKey?: string
+    apiKey?: string,
+    originalName?: string
   ) {
     this.broadcast(sessionId, {
       type: "extraction_started",
@@ -76,7 +77,7 @@ class VerificationOrchestrator {
     });
 
     // Step 1: Extraction Agent
-    const extraction = await extractDocumentFields(filePath, docType, mimeType, apiKey);
+    const extraction = await extractDocumentFields(filePath, docType, mimeType, apiKey, originalName);
 
     // Persist document record
     const documentRecord = await prisma.document.create({
@@ -110,7 +111,7 @@ class VerificationOrchestrator {
       payload: { docType, status: `Evaluating internal typography & tamper consistency for ${docType}...` },
     });
 
-    const tamperResult = await analyzeDocumentTampering(filePath, docType, mimeType, apiKey);
+    const tamperResult = await analyzeDocumentTampering(filePath, docType, mimeType, apiKey, originalName);
 
     // Update document record with tamper data
     await prisma.document.update({

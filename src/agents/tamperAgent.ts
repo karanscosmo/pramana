@@ -15,7 +15,8 @@ export async function analyzeDocumentTampering(
   filePath: string,
   docType: DocType,
   mimeType: string,
-  apiKey?: string
+  apiKey?: string,
+  originalName?: string
 ): Promise<TamperOutput> {
   // If Anthropic API key is provided, execute forensic inspection with Claude Vision
   if (apiKey && fs.existsSync(filePath)) {
@@ -27,7 +28,7 @@ export async function analyzeDocumentTampering(
   }
 
   // Local forensic analysis engine
-  return analyzeTamperLocally(filePath, docType);
+  return analyzeTamperLocally(filePath, docType, originalName);
 }
 
 /**
@@ -112,7 +113,7 @@ Respond ONLY in this exact JSON schema:
  * Local Forensic Analysis Engine
  * Performs metadata inspection, software stamp detection, compression block checks, and heuristic anomalies.
  */
-function analyzeTamperLocally(filePath: string, docType: DocType): TamperOutput {
+function analyzeTamperLocally(filePath: string, docType: DocType, originalName?: string): TamperOutput {
   if (!fs.existsSync(filePath)) {
     return {
       tamperRisk: "low",
@@ -123,7 +124,7 @@ function analyzeTamperLocally(filePath: string, docType: DocType): TamperOutput 
 
   try {
     const fileBuffer = fs.readFileSync(filePath);
-    const fileName = path.basename(filePath).toLowerCase();
+    const fileName = (originalName || path.basename(filePath)).toLowerCase();
     const rawContent = fileBuffer.toString("latin1");
 
     const flaggedRegions: Array<{ field: string; reason: string }> = [];

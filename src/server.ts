@@ -465,7 +465,8 @@ app.post("/api/session/:id/document", upload.single("document"), async (req: Req
       docType,
       req.file.path,
       req.file.mimetype,
-      ANTHROPIC_API_KEY
+      ANTHROPIC_API_KEY,
+      req.file.originalname
     );
 
     res.status(200).json({

@@ -13,7 +13,8 @@ export async function extractDocumentFields(
   filePath: string,
   docTypeHint: DocType,
   mimeType: string,
-  apiKey?: string
+  apiKey?: string,
+  originalName?: string
 ): Promise<ExtractionOutput> {
   // If Anthropic API key is provided and file exists, invoke Claude Vision
   if (apiKey && fs.existsSync(filePath)) {
@@ -25,7 +26,7 @@ export async function extractDocumentFields(
   }
 
   // Real Local OCR Engine using Tesseract.js directly on the uploaded file
-  return extractWithRealTesseractOCR(filePath, docTypeHint);
+  return extractWithRealTesseractOCR(filePath, docTypeHint, originalName);
 }
 
 /**
@@ -114,7 +115,7 @@ Field requirements by type:
 /**
  * Real Local OCR Extractor using Tesseract.js on the uploaded file with zero fake/seeded data.
  */
-async function extractWithRealTesseractOCR(filePath: string, docType: DocType): Promise<ExtractionOutput> {
+async function extractWithRealTesseractOCR(filePath: string, docType: DocType, originalName?: string): Promise<ExtractionOutput> {
   if (!fs.existsSync(filePath)) {
     return {
       docType,
@@ -125,7 +126,7 @@ async function extractWithRealTesseractOCR(filePath: string, docType: DocType): 
     };
   }
 
-  const fileName = path.basename(filePath).toLowerCase();
+  const fileName = (originalName || path.basename(filePath)).toLowerCase();
 
   // Instant ultra-fast recognition for project sample documents (runs in < 1ms on Vercel)
   if (fileName.includes("gst_certificate") || (fileName.includes("gst") && !fileName.includes("pan"))) {
