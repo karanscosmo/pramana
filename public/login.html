@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In — Pramana (प्रमाण) Merchant Verification</title>
+  <meta name="description" content="Sign in to your Pramana merchant dashboard to view real-time document verification records and audit logs.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background-color: var(--obsidian-bg);
+      color: var(--obsidian-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auth-split-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 1024px) {
+      .auth-split-wrapper {
+        grid-template-columns: 1fr;
+      }
+      .auth-left-hero {
+        display: none !important;
+      }
+    }
+
+    /* Left Editorial Hero */
+    .auth-left-hero {
+      position: relative;
+      background-image: url('assets/auth-hero.jpg');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3.5rem;
+      overflow: hidden;
+      border-right: 1px solid var(--obsidian-border);
+    }
+
+    .auth-left-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg, 
+        rgba(14, 13, 11, 0.90) 0%, 
+        rgba(14, 13, 11, 0.78) 45%, 
+        rgba(14, 13, 11, 0.94) 100%
+      );
+      z-index: 1;
+    }
+
+    .auth-hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .auth-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #ffffff;
+      margin-bottom: 2rem;
+    }
+
+    .auth-hero-title {
+      font-family: var(--font-serif);
+      font-size: 2.8rem;
+      line-height: 1.15;
+      color: #ffffff;
+      margin-top: 1rem;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
+    }
+
+    .auth-hero-sub {
+      color: #dedad2;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+      max-width: 440px;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    }
+
+    .auth-quote-box {
+      margin-top: 2.5rem;
+      padding: 1.25rem 1.6rem;
+      background: rgba(14, 13, 11, 0.75);
+      backdrop-filter: blur(12px);
+      border-left: 3px solid #34d399;
+      border-radius: 0 10px 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .auth-quote-text {
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      color: #ffffff;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .auth-quote-author {
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #34d399;
+      letter-spacing: 0.05em;
+    }
+
+    .auth-hero-footer {
+      position: relative;
+      z-index: 2;
+      color: #c7c3ba;
+      font-size: 0.84rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 1.5rem;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Right Form Area */
+    .auth-right-form {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      background: #151412;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .auth-header {
+      margin-bottom: 2rem;
+    }
+
+    .auth-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--seal-emerald-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .auth-heading {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .auth-subheading {
+      color: var(--obsidian-muted);
+      font-size: 0.92rem;
+      margin-top: 0.35rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #e5e2da;
+    }
+
+    .form-input {
+      background: #1e1c19;
+      border: 1px solid var(--obsidian-border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      color: #ffffff;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--seal-emerald-light);
+      background: #24221e;
+      box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
+    }
+
+    .auth-submit-btn {
+      width: 100%;
+      padding: 0.95rem 1.5rem;
+      border-radius: 8px;
+      background: var(--seal-emerald);
+      color: #ffffff;
+      border: none;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 1.6rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(11, 102, 77, 0.4);
+    }
+
+    .auth-submit-btn:hover {
+      background: #0d7a5c;
+      transform: translateY(-1px);
+    }
+
+    .auth-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-alert {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      margin-bottom: 1.25rem;
+      display: none;
+    }
+
+    .auth-alert.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .auth-alert.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+
+    .auth-foot-note {
+      text-align: center;
+      margin-top: 1.8rem;
+      font-size: 0.88rem;
+      color: var(--obsidian-muted);
+    }
+
+    .auth-foot-link {
+      color: var(--seal-emerald-light);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-foot-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-split-wrapper">
+    
+    <!-- Left Hero Area -->
+    <aside class="auth-left-hero">
+      <div class="auth-hero-content">
+        <a href="/" class="auth-brand">
+          <svg class="brand-seal-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 32px; height: 32px; color: var(--seal-emerald-light);">
+            <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="4.5" />
+            <circle cx="50" cy="50" r="37" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" />
+            <path d="M34 50 L45 61 L68 38" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div style="font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600;">
+            Pramana <span style="font-family: var(--font-devanagari); font-weight: 400; color: var(--seal-emerald-light);">प्रमाण</span>
+          </div>
+        </a>
+
+        <h1 class="auth-hero-title">
+          Welcome back.<br>
+          <em>Your trust stream is live.</em>
+        </h1>
+        <p class="auth-hero-sub">
+          Sign in to monitor live verification telemetry, download audit certificates, and run instant document fraud checks.
+        </p>
+
+        <div class="auth-quote-box">
+          <div class="auth-quote-text">
+            "In fintech compliance, the model feeling confident is not acceptable. Only mathematical truth and live clearing matter."
+          </div>
+          <div class="auth-quote-author">— PRAMANA ARCHITECTURAL PRINCIPLE</div>
+        </div>
+      </div>
+
+      <div class="auth-hero-footer">
+        © 2026 Pramana Technologies • Autonomous Business Document Verification
+      </div>
+    </aside>
+
+    <!-- Right Form Area -->
+    <main class="auth-right-form">
+      <div class="auth-card">
+        
+        <div class="auth-header">
+          <span class="auth-tag">Merchant Portal</span>
+          <h2 class="auth-heading">Sign In to Dashboard</h2>
+          <p class="auth-subheading">Enter your registered email and password to access your dashboard.</p>
+        </div>
+
+        <div id="auth-alert" class="auth-alert"></div>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label" for="email">Business Email</label>
+            <input type="email" id="email" class="form-input" placeholder="name@business.in" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="form-label" for="password">Password</label>
+            </div>
+            <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" id="submit-btn" class="auth-submit-btn">
+            <span>Sign In to Dashboard</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </form>
+
+        <div class="auth-foot-note">
+          Don't have a merchant account? <a href="/signup.html" class="auth-foot-link">Create one in 2 minutes</a>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    const form = document.getElementById('login-form');
+    const alertBox = document.getElementById('auth-alert');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function showAlert(msg, type = 'error') {
+      alertBox.textContent = msg;
+      alertBox.className = `auth-alert ${type}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.className = 'auth-alert';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in...';
+
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Invalid credentials');
+        }
+
+        localStorage.setItem('pramana_token', data.token);
+        localStorage.setItem('pramana_user', JSON.stringify(data.user));
+
+        showAlert('Signed in successfully! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = '/dashboard.html';
+        }, 500);
+
+      } catch (err) {
+        showAlert(err.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Sign In to Dashboard</span>
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>`;
+      }
+    });
+  </script>
+
+</body>
+</html>

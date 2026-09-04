@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — Pramana (प्रमाण) Merchant Verification</title>
+  <meta name="description" content="Create your Pramana merchant account for autonomous, explainable business document verification and instant fraud detection.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background-color: var(--obsidian-bg);
+      color: var(--obsidian-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auth-split-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 1024px) {
+      .auth-split-wrapper {
+        grid-template-columns: 1fr;
+      }
+      .auth-left-hero {
+        display: none !important;
+      }
+    }
+
+    /* Left Editorial Hero */
+    .auth-left-hero {
+      position: relative;
+      background-image: url('assets/auth-hero.jpg');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 3.5rem;
+      overflow: hidden;
+      border-right: 1px solid var(--obsidian-border);
+    }
+
+    .auth-left-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg, 
+        rgba(14, 13, 11, 0.90) 0%, 
+        rgba(14, 13, 11, 0.78) 45%, 
+        rgba(14, 13, 11, 0.94) 100%
+      );
+      z-index: 1;
+    }
+
+    .auth-hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .auth-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #ffffff;
+      margin-bottom: 2rem;
+    }
+
+    .auth-hero-title {
+      font-family: var(--font-serif);
+      font-size: 2.8rem;
+      line-height: 1.15;
+      color: #ffffff;
+      margin-top: 1rem;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
+    }
+
+    .auth-hero-sub {
+      color: #dedad2;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+      max-width: 460px;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    }
+
+    .auth-badges-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      margin-top: 2.5rem;
+    }
+
+    .auth-badge-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #ffffff;
+      background: rgba(14, 13, 11, 0.75);
+      backdrop-filter: blur(10px);
+      padding: 0.7rem 1.1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      width: fit-content;
+    }
+
+    .auth-hero-footer {
+      position: relative;
+      z-index: 2;
+      color: #c7c3ba;
+      font-size: 0.84rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 1.5rem;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Right Form Area */
+    .auth-right-form {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      background: #151412;
+      overflow-y: auto;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 540px;
+    }
+
+    .auth-header {
+      margin-bottom: 2rem;
+    }
+
+    .auth-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--seal-emerald-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .auth-heading {
+      font-family: var(--font-serif);
+      font-size: 2.1rem;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .auth-subheading {
+      color: var(--obsidian-muted);
+      font-size: 0.92rem;
+      margin-top: 0.35rem;
+    }
+
+    .auth-section-title {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--seal-emerald-light);
+      margin: 1.8rem 0 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--obsidian-border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e5e2da;
+    }
+
+    .form-input, .form-select {
+      background: #1e1c19;
+      border: 1px solid var(--obsidian-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: #ffffff;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--seal-emerald-light);
+      background: #24221e;
+      box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
+    }
+
+    .form-select option {
+      background: #1e1c19;
+      color: #ffffff;
+    }
+
+    .auth-submit-btn {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      border-radius: 8px;
+      background: var(--seal-emerald);
+      color: #ffffff;
+      border: none;
+      font-family: var(--font-sans);
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 1.5rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(11, 102, 77, 0.4);
+    }
+
+    .auth-submit-btn:hover {
+      background: #0d7a5c;
+      transform: translateY(-1px);
+    }
+
+    .auth-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-alert {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      margin-bottom: 1.25rem;
+      display: none;
+    }
+
+    .auth-alert.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .auth-alert.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+    }
+
+    .auth-foot-note {
+      text-align: center;
+      margin-top: 1.8rem;
+      font-size: 0.86rem;
+      color: var(--obsidian-muted);
+    }
+
+    .auth-foot-link {
+      color: var(--seal-emerald-light);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-foot-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-split-wrapper">
+    
+    <!-- Left Hero Area -->
+    <aside class="auth-left-hero">
+      <div class="auth-hero-content">
+        <a href="/" class="auth-brand">
+          <svg class="brand-seal-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 32px; height: 32px; color: var(--seal-emerald-light);">
+            <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="4.5" />
+            <circle cx="50" cy="50" r="37" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" />
+            <path d="M34 50 L45 61 L68 38" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div style="font-family: var(--font-serif); font-size: 1.4rem; font-weight: 600;">
+            Pramana <span style="font-family: var(--font-devanagari); font-weight: 400; color: var(--seal-emerald-light);">प्रमाण</span>
+          </div>
+        </a>
+
+        <h1 class="auth-hero-title">
+          Autonomous KYB.<br>
+          <em>Ground truth for Indian business.</em>
+        </h1>
+        <p class="auth-hero-sub">
+          Instant document cross-verification across GST, PAN, and live RBI bank clearing directories with zero human squinting.
+        </p>
+
+        <div class="auth-badges-list">
+          <div class="auth-badge-item">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: var(--seal-emerald-light);">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Live Razorpay & RBI IFSC Clearing</span>
+          </div>
+          <div class="auth-badge-item">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: var(--seal-emerald-light);">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>GSTIN Modulo-36 Math Verification</span>
+          </div>
+          <div class="auth-badge-item">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color: var(--seal-emerald-light);">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Strict Evidence Trail (Zero Opaque AI)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-hero-footer">
+        © 2026 Pramana Technologies • Autonomous Business Document Verification
+      </div>
+    </aside>
+
+    <!-- Right Form Area -->
+    <main class="auth-right-form">
+      <div class="auth-card">
+        
+        <div class="auth-header">
+          <span class="auth-tag">Merchant Onboarding</span>
+          <h2 class="auth-heading">Create your business account</h2>
+          <p class="auth-subheading">Enter your personal & business details to access your custom verification dashboard.</p>
+        </div>
+
+        <div id="auth-alert" class="auth-alert"></div>
+
+        <form id="signup-form">
+          
+          <!-- SECTION 1: Authorized Person -->
+          <div class="auth-section-title">
+            <span>1. Authorized Person Details</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fullName">Full Name (Director / Owner)</label>
+              <input type="text" id="fullName" class="form-input" placeholder="e.g. Aravind Sharma" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="phone">Mobile Number</label>
+              <input type="tel" id="phone" class="form-input" placeholder="e.g. 9820012345" maxlength="10" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="email">Business Email</label>
+              <input type="email" id="email" class="form-input" placeholder="aravind@enterprises.in" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="password">Password (Min 6 chars)</label>
+              <input type="password" id="password" class="form-input" placeholder="••••••••" minlength="6" required>
+            </div>
+          </div>
+
+          <!-- SECTION 2: Business Details -->
+          <div class="auth-section-title">
+            <span>2. Registered Business Details</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="businessName">Legal Business / Trade Name</label>
+            <input type="text" id="businessName" class="form-input" placeholder="e.g. Aravind Enterprises Pvt Ltd" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="businessType">Business Constitution / Type</label>
+            <select id="businessType" class="form-select" required>
+              <option value="" disabled selected>Select Business Type</option>
+              <option value="sole_proprietorship">Sole Proprietorship</option>
+              <option value="private_limited">Private Limited Company (Pvt Ltd)</option>
+              <option value="partnership">Partnership Firm</option>
+              <option value="llp">Limited Liability Partnership (LLP)</option>
+              <option value="public_limited">Public Limited Company</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="city">City</label>
+              <input type="text" id="city" class="form-input" placeholder="e.g. Mumbai" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="state">State</label>
+              <input type="text" id="state" class="form-input" placeholder="e.g. Maharashtra" required>
+            </div>
+          </div>
+
+          <button type="submit" id="submit-btn" class="auth-submit-btn">
+            <span>Create Account & Enter Dashboard</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+
+        </form>
+
+        <div class="auth-foot-note">
+          Already registered? <a href="/login.html" class="auth-foot-link">Sign In to your Dashboard</a>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    const form = document.getElementById('signup-form');
+    const alertBox = document.getElementById('auth-alert');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function showAlert(msg, type = 'error') {
+      alertBox.textContent = msg;
+      alertBox.className = `auth-alert ${type}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.className = 'auth-alert';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating Account...';
+
+      const payload = {
+        fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim().toLowerCase(),
+        password: document.getElementById('password').value,
+        businessName: document.getElementById('businessName').value.trim(),
+        businessType: document.getElementById('businessType').value,
+        city: document.getElementById('city').value.trim(),
+        state: document.getElementById('state').value.trim(),
+      };
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to create account');
+        }
+
+        // Store JWT token and user info
+        localStorage.setItem('pramana_token', data.token);
+        localStorage.setItem('pramana_user', JSON.stringify(data.user));
+
+        showAlert('Account created successfully! Redirecting to dashboard...', 'success');
+        setTimeout(() => {
+          window.location.href = '/dashboard.html';
+        }, 800);
+
+      } catch (err) {
+        showAlert(err.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Create Account & Enter Dashboard</span>
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>`;
+      }
+    });
+  </script>
+
+</body>
+</html>

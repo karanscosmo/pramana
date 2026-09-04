@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pramana (प्रमाण) — Autonomous Document Verification & Ground Truth</title>
+  <meta name="description" content="Pramana reads a business's onboarding documents — GST certificate, PAN card, cancelled cheque — extracts every key field, and cross-verifies them deterministically and against live public registries.">
+  
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230b664d'/><path d='M30 50 L44 64 L70 36' fill='none' stroke='%23ffffff' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+</head>
+<body>
+
+  <!-- PERSISTENT EDITORIAL HEADER -->
+  <header class="site-header">
+    <a href="#" class="brand-mark">
+      <svg class="brand-seal-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="4.5" />
+        <circle cx="50" cy="50" r="37" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" />
+        <path d="M34 50 L45 61 L68 38" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="50" cy="14" r="3" fill="currentColor" />
+        <circle cx="50" cy="86" r="3" fill="currentColor" />
+        <circle cx="14" cy="50" r="3" fill="currentColor" />
+        <circle cx="86" cy="50" r="3" fill="currentColor" />
+      </svg>
+      <div class="brand-title">
+        Pramana
+        <span class="brand-sanskrit">प्रमाण</span>
+      </div>
+    </a>
+
+    <div class="header-status">
+      <span class="status-pulse-dot"></span>
+      <span>Live Bank & GST Verification Active</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.65rem;" id="header-auth-actions">
+      <a href="/login.html" id="nav-login-link" class="header-nav-link">Sign In</a>
+      <a href="/signup.html" id="nav-signup-link" class="header-signup-btn">Create Account</a>
+      <a href="/verify.html" class="header-cta-btn">Open Verification Studio</a>
+    </div>
+  </header>
+
+  <script>
+    // Check if merchant is logged in
+    (function checkAuth() {
+      const token = localStorage.getItem('pramana_token');
+      const userStr = localStorage.getItem('pramana_user');
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          const container = document.getElementById('header-auth-actions');
+          if (container) {
+            container.innerHTML = `
+              <a href="/dashboard.html" class="header-dashboard-btn">
+                Dashboard (${user.fullName.split(' ')[0]})
+              </a>
+              <a href="/verify.html" class="header-cta-btn">Open Verification Studio</a>
+            `;
+          }
+        } catch (e) {}
+      }
+    })();
+  </script>
+
+  <!-- ======================================================================
+       CINEMATIC STICKY SCROLL STAGE (THE 4 STORY BEATS)
+       ====================================================================== -->
+  <section class="scroll-stage-wrapper">
+    <div class="sticky-viewport">
+
+      <!-- Scene Imagery Stack (Layered, Pointer-Reactive Parallax) -->
+      <div class="scene-canvas-container">
+        
+        <!-- Beat 1 Image: Stack of business documents on walnut desk -->
+        <img 
+          class="scene-image-layer active" 
+          src="assets/scene1-documents.jpg" 
+          alt="Tactile stack of Indian business verification documents including a GST registration certificate and official papers resting on a sunlit dark walnut desk" 
+          data-beat="0"
+        />
+
+        <!-- Beat 2 Image: Macro raking light reading text on cream paper -->
+        <img 
+          class="scene-image-layer" 
+          src="assets/scene2-reading.jpg" 
+          alt="Extreme macro close-up of an Indian GST certificate and PAN card on cream cotton paper showing fine guilloche security patterns and embossed state emblem under golden sunlight" 
+          data-beat="1"
+        />
+
+        <!-- Beat 3 Image: Solid brass stamp with glistening wet emerald ink -->
+        <img 
+          class="scene-image-layer" 
+          src="assets/scene3-stamp.jpg" 
+          alt="Dramatic close-up of a heavy solid brass verification seal freshly stamped into thick archival paper with wet glistening emerald green ink and delicate gold flecks" 
+          data-beat="2"
+        />
+
+        <!-- Beat 4 Image: Resolved, calm final verified certificate portfolio -->
+        <img 
+          class="scene-image-layer" 
+          src="assets/scene4-verified.jpg" 
+          alt="Calm, minimalist executive desk with a verified business credential folder bearing a clean embossed green and gold seal of approval in peaceful morning light" 
+          data-beat="3"
+        />
+
+        <!-- Vignette & Lighting Atmosphere Layer -->
+        <div class="scene-overlay-mask"></div>
+
+        <!-- Subtle Scanline sweep for Beat 2 (Extraction) -->
+        <div class="scanline-overlay"></div>
+      </div>
+
+      <!-- Narrative Stage: Staged Editorial Reveals -->
+      <div class="narrative-stage">
+
+        <!-- BEAT 1: The Stack / Implied Problem -->
+        <article class="narrative-beat active" data-beat="0">
+          <div class="beat-kicker">MANUAL CHECKING PROBLEM</div>
+          <h1 class="beat-headline">
+            Three documents.<br>
+            Fifteen numbers.<br>
+            <em>Checking by hand is slow and risky.</em>
+          </h1>
+          <p class="beat-body">
+            Whenever a shopkeeper or business opens an account, someone has to check their GST certificate, PAN card, and bank cheque by eye. Matching tiny numbers and spelling differences takes hours — and fake papers can easily slip through.
+          </p>
+          <div style="background: rgba(17, 16, 14, 0.85); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(52, 211, 153, 0.35); border-left: 4px solid #34d399; padding: 1rem 1.25rem; border-radius: 0 10px 10px 0; margin-top: 1.25rem; font-size: 0.92rem; line-height: 1.6; color: #f3f0ea; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);">
+            <strong style="color: #34d399; font-weight: 700;">How is Pramana different?</strong> Most verification APIs return a pass/fail code for another system to consume. Pramana is built to be watched and understood by a person — every check shows its evidence, every document is checked for internal tampering, and every session ends in a memo a human can actually read.
+          </div>
+          <div class="beat-meta-row">
+            <span class="beat-chip">GST Certificate</span>
+            <span class="beat-chip">PAN Card</span>
+            <span class="beat-chip">Bank Cheque</span>
+            <span class="beat-chip">6 Pipeline Stages</span>
+          </div>
+        </article>
+
+        <!-- BEAT 2: The Reading / Vision Extraction -->
+        <article class="narrative-beat" data-beat="1">
+          <div class="beat-kicker">STEP 1 • SMART DOCUMENT READING</div>
+          <h2 class="beat-headline">
+            It reads every single letter.<br>
+            <em>Even from folded paper and phone photos.</em>
+          </h2>
+          <p class="beat-body">
+            Pramana reads paper scans, PDFs, and mobile phone photos accurately. If a photo is blurry, torn, or has faded ink, it clearly tells you instead of making wild guesses. You get clean details extracted with 100% honesty.
+          </p>
+          <div class="beat-meta-row">
+            <span class="beat-chip">Clear Text Reading</span>
+            <span class="beat-chip">Catches Blurry Photos</span>
+            <span class="beat-chip">Zero Guesswork</span>
+          </div>
+        </article>
+
+        <!-- BEAT 3: The Verification / Stamp of Truth -->
+        <article class="narrative-beat" data-beat="2">
+          <div class="beat-kicker">STEP 2 & 3 • REAL GOVERNMENT RULES & BANK CHECKS</div>
+          <h2 class="beat-headline">
+            No AI guesswork.<br>
+            <em>Real government formulas and live bank checks.</em>
+          </h2>
+          <p class="beat-body">
+            1. Matches the PAN card directly against the PAN hidden inside the GST number.<br>
+            2. Recalculates the GST number's official 15th digit formula to catch fake numbers instantly.<br>
+            3. Verifies the bank IFSC code live with Razorpay to confirm the branch really exists.
+          </p>
+          <div class="beat-meta-row">
+            <span class="beat-chip">PAN inside GST Check</span>
+            <span class="beat-chip">Fake GST Formula Catch</span>
+            <span class="beat-chip">Live Bank IFSC Check</span>
+          </div>
+        </article>
+
+        <!-- BEAT 4: The Proof / Settled Trust -->
+        <article class="narrative-beat" data-beat="3">
+          <div class="beat-kicker">FINAL RESULT • 100% PEACE OF MIND</div>
+          <h2 class="beat-headline">
+            Not just a rubber stamp.<br>
+            <em>Complete confidence that the business is genuine.</em>
+          </h2>
+          <p class="beat-body">
+            Before your team even opens the file, fake GST numbers, wrong IFSC codes, and mismatched owner names are already caught. You get an instant report with clear proof for every single check.
+          </p>
+          <div class="beat-meta-row">
+            <span class="beat-chip">Clear Reason for Every Flag</span>
+            <span class="beat-chip">Checks in 2 Seconds</span>
+            <span class="beat-chip">Stops Fake Businesses</span>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Right-Side Scrollytelling Progress Rail -->
+      <nav class="stage-progress-rail" aria-label="Story Beats Navigation">
+        <button class="rail-dot active" data-beat="0" data-label="I. The 3 Papers" aria-label="Beat 1: The 3 Papers"></button>
+        <button class="rail-dot" data-beat="1" data-label="II. Reading Text" aria-label="Beat 2: Reading Text"></button>
+        <button class="rail-dot" data-beat="2" data-label="III. Live Checks" aria-label="Beat 3: Live Checks"></button>
+        <button class="rail-dot" data-beat="3" data-label="IV. Verified Result" aria-label="Beat 4: Verified Result"></button>
+      </nav>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       INTERACTIVE SECTION: THE 6 PILLARS & LIVE DETERMINISTIC BENCH
+       ====================================================================== -->
+  <section class="interactive-bench-section" id="interactive-suite">
+    
+    <header class="bench-header">
+      <div class="bench-kicker">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        The 6 Core Verification Stages
+      </div>
+      <h2 class="bench-title">How Pramana catches fraud: 6 clear pipeline stages anyone can verify.</h2>
+      <p class="bench-description">
+        Saying "the AI feels confident" is not good enough for financial safety. Pramana uses AI to read documents and inspect typography, but relies on official government rules, bank clearing registries, and human-readable underwriting memos to decide what is true.
+      </p>
+    </header>
+
+
+
+    <!-- The 6 Pillars Continuous Moving Track (Right to Left) -->
+    <div class="pillars-marquee-container" id="pillars-marquee-container">
+      <div class="pillars-marquee-track" id="pillars-marquee-track">
+        
+        <!-- CARD 01 -->
+        <div class="pillar-card" data-pillar-id="1" tabindex="0" role="button" aria-label="View Pillar 1 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar1-pan-gst.jpg" alt="PAN matches GST Number comparison" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 01 • STRUCTURAL EMBED</div>
+            <h3 class="pillar-heading">PAN matches GST Number</h3>
+            <p class="pillar-body">
+              By government design, letters 3 to 12 of every 15-character Indian GST number are the exact PAN. Pramana compares them directly — catching mismatched or borrowed PAN cards instantly without needing any internet connection.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Official GST Council Rule</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 02 -->
+        <div class="pillar-card" data-pillar-id="2" tabindex="0" role="button" aria-label="View Pillar 2 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar2-gst-checksum.jpg" alt="GST 15th-digit checksum formula" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 02 • CHECKSUM FORMULA</div>
+            <h3 class="pillar-heading">GST Number Math Formula</h3>
+            <p class="pillar-body">
+              The 15th digit of every GST number is calculated from the first 14 letters using a government math formula (Modulo-36). Pramana recalculates it instantly — catching fake numbers and typing mistakes on the spot.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Official 15th-Digit Checksum Rule</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 03 -->
+        <div class="pillar-card" data-pillar-id="3" tabindex="0" role="button" aria-label="View Pillar 3 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar3-bank-ifsc.jpg" alt="Live Bank IFSC Search via Razorpay" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 03 • CLEARING REGISTRY</div>
+            <h3 class="pillar-heading">Live Bank IFSC Search</h3>
+            <p class="pillar-body">
+              Pramana checks the IFSC code on the cheque against Razorpay's live national bank directory. It verifies the bank name, branch address, and confirms if NEFT/UPI transfers work. Fake bank codes get caught immediately.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Live Razorpay Bank Database</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 04 -->
+        <div class="pillar-card" data-pillar-id="4" tabindex="0" role="button" aria-label="View Pillar 4 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar4-name-match.jpg" alt="Company and Owner Name Match" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 04 • FUZZY MATCHING</div>
+            <h3 class="pillar-heading">Company & Owner Name Match</h3>
+            <p class="pillar-body">
+              Business names often have small differences across documents (like "Pvt Ltd" vs "Private Limited", or "M/S Sharma Enterprises" vs "Sharma Enterprises"). Our system recognizes normal spelling variations while rejecting completely different names.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Smart Business Name Comparison</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 05 -->
+        <div class="pillar-card" data-pillar-id="5" tabindex="0" role="button" aria-label="View Pillar 5 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar5-tamper-forensic.jpg" alt="Tamper Consistency and Typography Forensics" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 05 • FORENSIC CHECK</div>
+            <h3 class="pillar-heading">Tamper Consistency</h3>
+            <p class="pillar-body">
+              Looks inside every document for signs of digital editing — mismatched fonts, compression artifacts, misaligned seals, and unnatural anti-aliasing — before it ever reaches a human reviewer.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Internal Typography & Pixel Forensics</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 06 -->
+        <div class="pillar-card" data-pillar-id="6" tabindex="0" role="button" aria-label="View Pillar 6 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar6-underwriter-memo.jpg" alt="Plain-Language Underwriter Narrative Memo" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 06 • HUMAN-READABLE</div>
+            <h3 class="pillar-heading">Underwriter Narrative</h3>
+            <p class="pillar-body">
+              Every verification ends in a plain-language memo, not a JSON status code — written the way an experienced credit & risk underwriter would actually explain an onboarding file to an audit committee.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Plain-Language Underwriter Brief</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUPLICATE SET FOR SEAMLESS INFINITE LOOPING -->
+        <!-- DUPLICATE CARD 01 -->
+        <div class="pillar-card" data-pillar-id="1" tabindex="0" role="button" aria-label="View Pillar 1 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar1-pan-gst.jpg" alt="PAN matches GST Number comparison" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 01 • STRUCTURAL EMBED</div>
+            <h3 class="pillar-heading">PAN matches GST Number</h3>
+            <p class="pillar-body">
+              By government design, letters 3 to 12 of every 15-character Indian GST number are the exact PAN. Pramana compares them directly — catching mismatched or borrowed PAN cards instantly without needing any internet connection.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Official GST Council Rule</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUPLICATE CARD 02 -->
+        <div class="pillar-card" data-pillar-id="2" tabindex="0" role="button" aria-label="View Pillar 2 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar2-gst-checksum.jpg" alt="GST 15th-digit checksum formula" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 02 • CHECKSUM FORMULA</div>
+            <h3 class="pillar-heading">GST Number Math Formula</h3>
+            <p class="pillar-body">
+              The 15th digit of every GST number is calculated from the first 14 letters using a government math formula (Modulo-36). Pramana recalculates it instantly — catching fake numbers and typing mistakes on the spot.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Official 15th-Digit Checksum Rule</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUPLICATE CARD 03 -->
+        <div class="pillar-card" data-pillar-id="3" tabindex="0" role="button" aria-label="View Pillar 3 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar3-bank-ifsc.jpg" alt="Live Bank IFSC Search via Razorpay" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 03 • CLEARING REGISTRY</div>
+            <h3 class="pillar-heading">Live Bank IFSC Search</h3>
+            <p class="pillar-body">
+              Pramana checks the IFSC code on the cheque against Razorpay's live national bank directory. It verifies the bank name, branch address, and confirms if NEFT/UPI transfers work. Fake bank codes get caught immediately.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Live Razorpay Bank Database</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUPLICATE CARD 04 -->
+        <div class="pillar-card" data-pillar-id="4" tabindex="0" role="button" aria-label="View Pillar 4 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar4-name-match.jpg" alt="Company and Owner Name Match" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 04 • FUZZY MATCHING</div>
+            <h3 class="pillar-heading">Company & Owner Name Match</h3>
+            <p class="pillar-body">
+              Business names often have small differences across documents (like "Pvt Ltd" vs "Private Limited", or "M/S Sharma Enterprises" vs "Sharma Enterprises"). Our system recognizes normal spelling variations while rejecting completely different names.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Smart Business Name Comparison</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUPLICATE CARD 05 -->
+        <div class="pillar-card" data-pillar-id="5" tabindex="0" role="button" aria-label="View Pillar 5 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar5-tamper-forensic.jpg" alt="Tamper Consistency and Typography Forensics" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 05 • FORENSIC CHECK</div>
+            <h3 class="pillar-heading">Tamper Consistency</h3>
+            <p class="pillar-body">
+              Looks inside every document for signs of digital editing — mismatched fonts, compression artifacts, misaligned seals, and unnatural anti-aliasing — before it ever reaches a human reviewer.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Internal Typography & Pixel Forensics</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUPLICATE CARD 06 -->
+        <div class="pillar-card" data-pillar-id="6" tabindex="0" role="button" aria-label="View Pillar 6 details">
+          <div class="pillar-thumb-wrap">
+            <img src="/assets/pillar6-underwriter-memo.jpg" alt="Plain-Language Underwriter Narrative Memo" class="pillar-thumb-img" loading="lazy" />
+          </div>
+          <div class="pillar-card-content">
+            <div class="pillar-number">PILLAR 06 • HUMAN-READABLE</div>
+            <h3 class="pillar-heading">Underwriter Narrative</h3>
+            <p class="pillar-body">
+              Every verification ends in a plain-language memo, not a JSON status code — written the way an experienced credit & risk underwriter would actually explain an onboarding file to an audit committee.
+            </p>
+            <div class="pillar-card-footer">
+              <div class="pillar-statutory-tag">Plain-Language Underwriter Brief</div>
+              <span class="pillar-click-hint">Deep Dive →</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Live Deterministic Workbench -->
+    <div class="sandbox-workbench">
+      <div class="workbench-head">
+        <div>
+          <div class="workbench-badge">Try It Yourself</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.8rem; color: #ffffff; margin-top: 0.6rem;">
+            Test the Verification Rules Right Now
+          </h3>
+        </div>
+        <div style="color: var(--obsidian-muted); font-size: 0.88rem; max-width: 440px;">
+          Type any real or altered GST number, or check any bank IFSC code against the live bank database.
+        </div>
+      </div>
+
+      <div class="workbench-grid">
+        
+        <!-- Tool 1: Live Mod-36 GSTIN Validator -->
+        <div class="workbench-tool-card">
+          <div class="tool-label">Official Formula Check</div>
+          <div class="tool-title">GST Number 15th Digit Calculator</div>
+          <div>
+            <input 
+              type="text" 
+              id="gstin-tool-input" 
+              class="workbench-input" 
+              value="27AAPFU0939F1ZV" 
+              maxlength="15" 
+              placeholder="e.g. 27AAPFU0939F1ZV"
+            />
+          </div>
+          <div class="tool-live-result" id="gstin-tool-result">
+            <!-- Evaluated on-the-fly by script.js -->
+          </div>
+        </div>
+
+        <!-- Tool 2: Live Razorpay IFSC Query -->
+        <div class="workbench-tool-card">
+          <div class="tool-label">Live Bank Lookup</div>
+          <div class="tool-title">Check Bank IFSC Code</div>
+          <div style="display: flex; gap: 0.5rem;">
+            <input 
+              type="text" 
+              id="ifsc-tool-input" 
+              class="workbench-input" 
+              value="HDFC0000060" 
+              maxlength="11" 
+              placeholder="e.g. HDFC0000060 or SBIN0000001"
+            />
+            <button id="ifsc-tool-btn" class="workbench-action-btn">Check Bank</button>
+          </div>
+          <div class="tool-live-result" id="ifsc-tool-result">
+            <!-- Populated via live fetch to ifsc.razorpay.com -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Final Call to Action -->
+    <!-- Final Call to Action with 3D Indian Sovereign Chakra Background -->
+    <div class="pramana-closing-cta" id="closing-cta-section">
+      <div class="closing-3d-backdrop" aria-hidden="true">
+        <canvas id="indian-3d-chakra-canvas"></canvas>
+      </div>
+      <div class="closing-content-wrapper">
+        <h2 class="closing-title">Fast, honest document verification for Indian businesses.</h2>
+        <p class="closing-sub">
+          Pramana stops manual errors and catches fake documents in seconds, giving your team complete proof for every onboarding.
+        </p>
+        <div class="closing-button-group">
+          <a href="/verify.html" class="primary-audit-btn">
+            <span>Open Live Verification Studio</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- EDITORIAL FOOTER -->
+  <footer class="site-footer">
+    <div>
+      <strong>Pramana (प्रमाण)</strong> • Automated Business Document Verification for India
+    </div>
+    <div class="mono" style="font-size: 0.78rem;">
+      Live Public Checks: Razorpay Bank Directory • Official GST Council Rules
+    </div>
+    <div>
+      Simple, Fast & Trustworthy
+    </div>
+  </footer>
+
+  <!-- Detailed Pillar Explanation Modal -->
+  <div id="pillar-detail-modal" class="pillar-modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="pillar-modal-dialog">
+      <div class="pillar-modal-hero-wrap">
+        <img id="modal-pillar-img" class="pillar-modal-hero-img" src="" alt="Pillar illustration" />
+        <button type="button" class="pillar-modal-close-btn" id="modal-close-btn" aria-label="Close detailed view">✕</button>
+      </div>
+      <div class="pillar-modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem;">
+          <div class="pillar-number" id="modal-pillar-number">PILLAR 01</div>
+          <span class="pillar-statutory-tag" id="modal-pillar-tag">Official GST Council Rule</span>
+        </div>
+        <h2 class="pillar-heading" id="modal-pillar-title" style="font-size: 1.85rem; margin-bottom: 0.2rem;">Title</h2>
+        <p class="pillar-body" id="modal-pillar-summary" style="font-size: 1.02rem; color: var(--ink-secondary); line-height: 1.65; margin-bottom: 0.5rem;"></p>
+        
+        <div class="pillar-explainer-section">
+          <div class="pillar-explainer-heading">1. How This Check Works (Mechanism)</div>
+          <div class="pillar-explainer-text" id="modal-pillar-mechanism"></div>
+        </div>
+
+        <div class="pillar-explainer-section">
+          <div class="pillar-explainer-heading">2. Fraud & Forgery Patterns Caught</div>
+          <div class="pillar-explainer-text" id="modal-pillar-fraud"></div>
+        </div>
+
+        <div class="pillar-explainer-section">
+          <div class="pillar-explainer-heading">3. Regulatory & Statutory Authority</div>
+          <div class="pillar-explainer-text" id="modal-pillar-statutory"></div>
+        </div>
+
+        <div class="pillar-explainer-section" style="background: rgba(11, 102, 77, 0.05); border-color: rgba(11, 102, 77, 0.2);">
+          <div class="pillar-explainer-heading" style="color: var(--seal-emerald);">4. Underwriting & Audit Committee Impact</div>
+          <div class="pillar-explainer-text" id="modal-pillar-impact"></div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+          <button type="button" id="modal-done-btn" class="primary-audit-btn" style="padding: 0.65rem 1.4rem; font-size: 0.88rem;">
+            Done Reading
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

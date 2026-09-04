@@ -1,0 +1,48 @@
+{
+  "name": "pramana-backend",
+  "version": "1.0.0",
+  "description": "Pramana - KYB Document Verification Agent with Deterministic & Explainable Evidence Trail",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "tsx --test tests/**/*.test.ts",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate"
+  },
+  "keywords": [
+    "kyb",
+    "verification",
+    "gstin",
+    "pan",
+    "ifsc",
+    "fintech"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@prisma/client": "^5.22.0",
+    "axios": "^1.7.9",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^1.4.5-lts.1",
+    "tesseract.js": "^7.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.13.5",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

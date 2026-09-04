@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String                @id @default(cuid())
+  email        String                @unique
+  passwordHash String
+  fullName     String
+  businessName String
+  businessType String                // "proprietorship" | "private_limited" | "partnership" | "llp" | "public_limited"
+  phone        String
+  city         String
+  state        String
+  createdAt    DateTime              @default(now())
+  sessions     VerificationSession[]
+}
+
+model VerificationSession {
+  id            String              @id @default(cuid())
+  userId        String?
+  user          User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime            @default(now())
+  status        String              @default("PROCESSING") // "PROCESSING" | "COMPLETE"
+  overallResult    String?             // "verified" | "flagged" | "insufficient_documents"
+  narrativeSummary String?             // the underwriter-style memo, written once all checks complete
+  documents        Document[]
+  checks           VerificationCheck[]
+}
+
+model Document {
+  id                   String              @id @default(cuid())
+  sessionId            String
+  session              VerificationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  docType              String              // "gst_certificate" | "pan_card" | "cancelled_cheque" | "bank_proof"
+  rawFileUrl           String              // stored upload or base64/url
+  extractedFields      String              // JSON serialized string for universal compatibility
+  extractionConfidence Float
+  tamperRisk           String?             // "low" | "medium" | "high"
+  tamperFlags          String?             // JSON serialized string [{ field, reason }]
+  tamperSummary        String?             // plain-language forensic summary
+  createdAt            DateTime            @default(now())
+}
+
+model VerificationCheck {
+  id                   String              @id @default(cuid())
+  sessionId            String
+  session              VerificationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  checkType            String              // "gstin_pan_match" | "gstin_checksum" | "pan_format" | "ifsc_lookup" | "name_cross_match"
+  result               String              // "pass" | "fail" | "inconclusive"
+  detail               String              // human-readable explanation citing specific values
+  evidence             String              // JSON serialized string of raw values / API responses
+  createdAt            DateTime            @default(now())
+}
