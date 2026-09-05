@@ -56,7 +56,7 @@ Pramana enforces a strict separation of concerns: **Vision AI is used strictly f
                                        │
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ STAGE 06: Underwriter Narrative Synthesis & Bodh (बोध) Real-Time RAG        │
+│ STAGE 06: Underwriter Narrative Synthesis & Bodh Real-Time RAG              │
 │ - Synthesizes all 5 upstream evidence stages into a plain-language memo     │
 │ - Outputs unambiguous recommendations: APPROVE, AUDIT_FLAG, or REJECT       │
 │ - Real-time vector retrieval (Bodh) allows underwriters to query docs       │
