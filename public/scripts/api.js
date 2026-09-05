@@ -154,3 +154,8 @@ export const API = {
     return res.json();
   }
 };
+
+if (typeof window !== 'undefined') {
+  window.API = API;
+}
+

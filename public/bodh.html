@@ -748,8 +748,10 @@
 
   </main>
 
-  <script src="/scripts/api.js"></script>
-  <script>
+  <script type="module">
+    import { API } from "/scripts/api.js";
+    window.API = API;
+
     (function() {
       // 1. Session & Report State Initialization
       const urlParams = new URLSearchParams(window.location.search);
