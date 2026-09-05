@@ -505,13 +505,15 @@
 
     .copilot-pill-row {
       display: flex;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.5rem;
+      padding: 6px 2px;
+      margin-top: 0.15rem;
+      margin-bottom: 0.25rem;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      padding-bottom: 2px;
     }
 
     .copilot-pill-row::-webkit-scrollbar {
@@ -522,21 +524,41 @@
       background: var(--paper-tint);
       border: 1px solid var(--paper-border);
       border-radius: 9999px;
-      padding: 0.3rem 0.72rem;
+      padding: 0.35rem 0.75rem;
       font-size: 0.78rem;
       font-family: var(--font-sans);
       color: var(--ink-secondary);
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
-      transition: all 0.2s ease;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+      outline: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
     }
 
     .copilot-pill:hover {
       background: #ffffff;
       border-color: var(--seal-emerald);
       color: var(--seal-emerald);
-      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(11, 102, 77, 0.12);
+    }
+
+    .copilot-pill:focus,
+    .copilot-pill:focus-visible {
+      background: #ffffff;
+      border-color: var(--seal-emerald);
+      color: var(--seal-emerald);
+      box-shadow: 0 0 0 2px rgba(11, 102, 77, 0.15);
+      outline: none;
+    }
+
+    .copilot-pill:active {
+      background: var(--seal-emerald-wash);
+      border-color: var(--seal-emerald);
+      color: var(--seal-emerald);
+      transform: scale(0.98);
     }
 
     .copilot-chat-box {
