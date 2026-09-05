@@ -201,9 +201,20 @@ The following metrics are collected from our actual automated test suite (`tests
 
 ---
 
-## 🎥 Video Demonstration
+## 🧠 Bodh (बोध) — Dedicated Document Intelligence Copilot
 
-- **Pitch & Walkthrough Video (5 Minutes)**: [Watch on YouTube](https://youtu.be/placeholder-pramana-pitch) *(Link will be updated upon final recording upload)*
+Pramana includes **Bodh (बोध)**, a specialized statutory document intelligence assistant available both embedded in the Verification Studio and as a **dedicated full-screen workspace** (`/bodh.html`):
+
+- **Dedicated View (`/bodh.html`)**: No vertical scrolling required. Full-height, distraction-free conversational workspace for credit underwriters and compliance officers.
+- **Instant Session Rehydration**: Automatically pulls verified session data from the studio URL (`?session=<id>`) or browser session storage. Displays active applicant entity details (GSTIN, PAN, IFSC, clearing bank, risk verdict).
+- **Audit-Grounded Reasoning**: Interrogates extracted text layers, internal typography forensics, Mod-36 checksum arithmetic, and Razorpay IFSC responses with zero hallucination.
+- **Interactive Quick-Audit Chips**:
+  - *"Why was the PAN card flagged for tampering?"* (Inspects anti-aliasing and font variance)
+  - *"Does legal business name match across all documents?"* (Evaluates Jaro-Winkler alignment)
+  - *"Is GSTIN checksum valid under Mod-36?"* (Recalculates ISO/IEC 7064 check digit)
+  - *"What is the IFSC clearing status?"* (Queries RBI clearing directory)
+  - *"Draft statutory underwriter memo"* (Synthesizes risk memo with RBI circular citations)
+- **Statutory Badges**: Every response embeds statutory citation badges (e.g., `[GST Rule 10A]`, `[IT Act Section 139A]`, `[RBI Circular DPSS.CO]`, `[Pixel Forensics Stage 5]`).
 
 ---
 

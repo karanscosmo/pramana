@@ -905,7 +905,7 @@ app.post("/api/session/:id/verify-bundle", upload.any(), async (req: Request, re
       });
     }
 
-    // Explicit demo query path or demo fixtures for instant video/pitch demo execution
+    // Explicit demo query path or test fixtures for instant local/cloud demo execution
     const isDemo = req.query.demo === "true" ||
       req.body?.isDemo === "true" ||
       files.some(f => {
