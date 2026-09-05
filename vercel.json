@@ -3,8 +3,8 @@
   "cleanUrls": true,
   "buildCommand": "npm run vercel-build",
   "functions": {
-    "api/**/*.js": {
-      "maxDuration": 60
+    "api/*.js": {
+      "maxDuration": 15
     }
   },
   "rewrites": [

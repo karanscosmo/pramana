@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bodh (बोध) — Autonomous KYB Document Intelligence & Statutory Copilot</title>
+  <meta name="description" content="Direct interactive RAG copilot for Pramana: Query verified business documents, inspect forensic tamper findings, cross-match legal entities, and audit statutory rules.">
+  
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background-color: var(--paper-cream);
+      color: var(--ink-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Fixed Top App Navbar */
+    .bodh-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(250, 247, 242, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--paper-border);
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bodh-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--ink-primary);
+    }
+
+    .bodh-logo-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--seal-emerald);
+      color: #ffffff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .bodh-brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bodh-brand-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .bodh-brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--ink-secondary);
+      font-weight: 500;
+    }
+
+    .bodh-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.95rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .nav-btn-secondary {
+      background: #ffffff;
+      border: 1px solid var(--paper-border-strong);
+      color: var(--ink-primary);
+    }
+
+    .nav-btn-secondary:hover {
+      background: var(--paper-tint);
+      border-color: var(--ink-muted);
+    }
+
+    .nav-btn-primary {
+      background: var(--seal-emerald);
+      border: 1px solid var(--seal-emerald);
+      color: #ffffff;
+    }
+
+    .nav-btn-primary:hover {
+      background: var(--seal-emerald-light);
+    }
+
+    /* Main Bodh Workspace */
+    .bodh-workspace {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Applicant Session Banner */
+    .applicant-summary-card {
+      background: #ffffff;
+      border: 1px solid var(--paper-border);
+      border-radius: 12px;
+      padding: 1.1rem 1.4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .applicant-entity-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .entity-label-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .entity-name {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--ink-primary);
+    }
+
+    .entity-verdict-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .pill-verified {
+      background: rgba(11, 102, 77, 0.1);
+      border: 1px solid rgba(11, 102, 77, 0.3);
+      color: var(--seal-emerald);
+    }
+
+    .pill-flagged {
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #dc2626;
+    }
+
+    .pill-neutral {
+      background: var(--paper-tint);
+      border: 1px solid var(--paper-border-strong);
+      color: var(--ink-secondary);
+    }
+
+    .entity-meta-chips {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--ink-secondary);
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .meta-chip strong {
+      color: var(--ink-primary);
+    }
+
+    .meta-mono {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: var(--paper-tint);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .applicant-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* Copilot Chat Canvas */
+    .copilot-canvas {
+      flex: 1;
+      min-height: 520px;
+      background: #ffffff;
+      border: 1px solid var(--paper-border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      overflow: hidden;
+    }
+
+    .canvas-header {
+      padding: 1rem 1.4rem;
+      border-bottom: 1px solid var(--paper-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fdfdfc;
+    }
+
+    .canvas-title {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .rag-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--seal-emerald);
+      background: var(--seal-emerald-wash);
+      border: 1px solid rgba(11, 102, 77, 0.2);
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .status-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--seal-emerald);
+      display: inline-block;
+      box-shadow: 0 0 0 2px rgba(11, 102, 77, 0.2);
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* Conversation Scroll Container */
+    .chat-scroll-area {
+      flex: 1;
+      padding: 1.5rem 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Message Bubbles */
+    .msg-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      max-width: 88%;
+      animation: fadeInMsg 0.2s ease-out;
+    }
+
+    @keyframes fadeInMsg {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-group.user {
+      align-self: flex-end;
+    }
+
+    .msg-group.assistant {
+      align-self: flex-start;
+      max-width: 94%;
+    }
+
+    .msg-author {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .msg-bubble-user {
+      background: var(--ink-primary);
+      color: #ffffff;
+      border-radius: 12px;
+      border-bottom-right-radius: 2px;
+      padding: 0.85rem 1.15rem;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .msg-bubble-assistant {
+      background: var(--paper-cream);
+      border: 1px solid var(--paper-border);
+      border-radius: 12px;
+      border-bottom-left-radius: 2px;
+      padding: 1.15rem 1.35rem;
+      font-size: 0.94rem;
+      line-height: 1.65;
+      color: var(--ink-primary);
+    }
+
+    .msg-bubble-assistant p {
+      margin-bottom: 0.75rem;
+    }
+
+    .msg-bubble-assistant p:last-child {
+      margin-bottom: 0;
+    }
+
+    .msg-bubble-assistant ul, .msg-bubble-assistant ol {
+      margin: 0.5rem 0 0.75rem 1.4rem;
+    }
+
+    .msg-bubble-assistant li {
+      margin-bottom: 0.35rem;
+    }
+
+    .msg-bubble-assistant strong {
+      color: var(--ink-primary);
+      font-weight: 600;
+    }
+
+    .citations-panel {
+      margin-top: 0.85rem;
+      padding-top: 0.75rem;
+      border-top: 1px dashed var(--paper-border);
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .citations-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: 0.25rem;
+    }
+
+    .citation-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #ffffff;
+      border: 1px solid rgba(11, 102, 77, 0.2);
+      color: var(--seal-emerald);
+      border-radius: 9999px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.72rem;
+      font-family: var(--font-sans);
+      font-weight: 500;
+    }
+
+    /* Welcome Hero Card inside Chat */
+    .welcome-card {
+      background: linear-gradient(135deg, rgba(11, 102, 77, 0.05) 0%, rgba(197, 155, 39, 0.04) 100%);
+      border: 1px solid rgba(11, 102, 77, 0.15);
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .welcome-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--ink-primary);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .welcome-desc {
+      font-size: 0.9rem;
+      color: var(--ink-secondary);
+      line-height: 1.55;
+      margin-bottom: 1rem;
+    }
+
+    .suggested-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .suggested-chip {
+      background: #ffffff;
+      border: 1px solid var(--paper-border-strong);
+      border-radius: 9999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      color: var(--ink-primary);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .suggested-chip:hover {
+      background: var(--seal-emerald-wash);
+      border-color: var(--seal-emerald);
+      color: var(--seal-emerald);
+      transform: translateY(-1px);
+    }
+
+    /* Sticky Bottom Input Bar */
+    .canvas-footer {
+      padding: 1rem 1.4rem;
+      background: #ffffff;
+      border-top: 1px solid var(--paper-border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .query-input {
+      flex: 1;
+      padding: 0.85rem 1.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--paper-border-strong);
+      font-family: var(--font-sans);
+      font-size: 0.94rem;
+      color: var(--ink-primary);
+      background: var(--paper-cream);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .query-input:focus {
+      background: #ffffff;
+      border-color: var(--seal-emerald);
+      box-shadow: 0 0 0 3px rgba(11, 102, 77, 0.12);
+    }
+
+    .btn-send {
+      background: var(--seal-emerald);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.85rem 1.35rem;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-send:hover:not(:disabled) {
+      background: var(--seal-emerald-light);
+      transform: translateY(-1px);
+    }
+
+    .btn-send:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .footer-note {
+      font-size: 0.72rem;
+      color: var(--ink-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 0.25rem;
+    }
+
+    /* Loading indicator bubble */
+    .typing-bubble {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--paper-cream);
+      border: 1px solid var(--paper-border);
+      border-radius: 12px;
+      padding: 0.75rem 1.15rem;
+      font-size: 0.85rem;
+      color: var(--ink-secondary);
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .typing-dots span {
+      width: 5px;
+      height: 5px;
+      background: var(--seal-emerald);
+      border-radius: 50%;
+      animation: typingBlink 1.2s infinite ease-in-out;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBlink {
+      0%, 100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    @media (max-width: 768px) {
+      .bodh-nav {
+        padding: 0.75rem 1rem;
+      }
+      .bodh-workspace {
+        padding: 1rem 0.75rem;
+      }
+      .applicant-summary-card {
+        padding: 0.85rem 1rem;
+      }
+      .msg-group {
+        max-width: 95%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="bodh-nav">
+    <a href="/index.html" class="bodh-brand">
+      <div class="bodh-logo-icon">प्र</div>
+      <div class="bodh-brand-text">
+        <span class="bodh-brand-title">
+          <span>Pramana</span>
+          <span style="font-family: var(--font-sans); font-size: 0.8rem; font-weight: 700; color: var(--seal-emerald); background: var(--seal-emerald-wash); padding: 2px 7px; border-radius: 4px;">BODH (बोध)</span>
+        </span>
+        <span class="bodh-brand-subtitle">Autonomous KYB Intelligence & Statutory Copilot</span>
+      </div>
+    </a>
+
+    <div class="bodh-nav-actions">
+      <a href="/verify.html" class="nav-btn nav-btn-secondary" title="Return to 6-stage document verification studio">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span>Verification Studio</span>
+      </a>
+      <a href="/dashboard.html" class="nav-btn nav-btn-secondary">
+        <span>Merchant Dashboard</span>
+      </a>
+      <span class="rag-status-badge" id="nav-session-badge">
+        <span class="status-pulse-dot"></span>
+        <span id="session-badge-label">Live Session</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Bodh Workspace -->
+  <main class="bodh-workspace">
+
+    <!-- Active Applicant Inspection Banner -->
+    <section class="applicant-summary-card" id="applicant-card">
+      <div class="applicant-entity-info">
+        <div class="entity-label-row">
+          <h1 class="entity-name" id="entity-name-display">Acme Infotech Private Limited</h1>
+          <span class="entity-verdict-pill pill-verified" id="entity-verdict-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span id="entity-verdict-text">VERIFIED</span>
+          </span>
+        </div>
+        <div class="entity-meta-chips">
+          <span class="meta-chip">
+            <span>GSTIN:</span>
+            <span class="meta-mono" id="meta-gstin">27AAPFU0939F1ZV</span>
+          </span>
+          <span class="meta-chip">
+            <span>PAN:</span>
+            <span class="meta-mono" id="meta-pan">AAPFU0939F</span>
+          </span>
+          <span class="meta-chip">
+            <span>IFSC:</span>
+            <span class="meta-mono" id="meta-ifsc">HDFC0000060</span>
+          </span>
+          <span class="meta-chip" id="meta-bank-name">
+            HDFC Bank • Fort Branch
+          </span>
+        </div>
+      </div>
+
+      <div class="applicant-actions">
+        <button id="btn-load-sample" class="nav-btn nav-btn-secondary" style="font-size: 0.78rem;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span>Reload Sample Session</span>
+        </button>
+        <a href="/verify.html" class="nav-btn nav-btn-primary" style="font-size: 0.78rem;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Verify New Documents</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Chat Canvas -->
+    <section class="copilot-canvas">
+      <div class="canvas-header">
+        <div class="canvas-title">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--seal-emerald);">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Bodh Underwriter Intelligence Thread</span>
+        </div>
+        <div class="rag-status-badge">
+          <span class="status-pulse-dot"></span>
+          <span>RAG Vector Memory Active</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Conversation Feed -->
+      <div class="chat-scroll-area" id="chat-stream">
+        
+        <!-- Welcome Card -->
+        <div class="welcome-card" id="welcome-card">
+          <div class="welcome-title">
+            <span>नमस्ते, I am Bodh (बोध)</span>
+          </div>
+          <p class="welcome-desc">
+            Your autonomous Indian KYB Underwriting & Statutory Document Intelligence Copilot. I read verified OCR text layers, examine pixel tamper forensics, execute Mod-36 checksum arithmetic, query RBI bank clearing registries, and cite exact statutory rules.
+          </p>
+
+          <div style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 0.5rem; letter-spacing: 0.05em;">
+            Suggested Inquiries for Current Session:
+          </div>
+          <div class="suggested-chips-container">
+            <button class="suggested-chip" data-q="Why was the PAN card flagged for tampering?">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>Why was the PAN card flagged for tampering?</span>
+            </button>
+            <button class="suggested-chip" data-q="Does the legal business name match across all documents?">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              <span>Does legal business name match across all documents?</span>
+            </button>
+            <button class="suggested-chip" data-q="Is the GSTIN checksum mathematically valid under Mod-36?">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10"/><path d="M12 7v10"/></svg>
+              <span>Is GSTIN checksum valid under Mod-36?</span>
+            </button>
+            <button class="suggested-chip" data-q="What is the bank branch and IFSC status for this applicant?">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <span>What is the IFSC clearing status?</span>
+            </button>
+            <button class="suggested-chip" data-q="Draft a statutory underwriter memorandum for risk compliance.">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Draft statutory underwriter memo</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sticky Query Bar -->
+      <div class="canvas-footer">
+        <form id="bodh-query-form" class="input-row">
+          <input 
+            type="text" 
+            id="bodh-input" 
+            class="query-input" 
+            placeholder="Ask Bodh anything about this applicant's documents, checksums, or forensic flags..." 
+            autocomplete="off" 
+            required
+          />
+          <button type="submit" id="btn-submit" class="btn-send">
+            <span>Ask Bodh</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </form>
+
+        <div class="footer-note">
+          <span>Grounded strictly in verified session artifacts • Zero hallucination protocol</span>
+          <span>Press Enter ↵ to submit inquiry</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/scripts/api.js"></script>
+  <script>
+    (function() {
+      // 1. Session & Report State Initialization
+      const urlParams = new URLSearchParams(window.location.search);
+      let currentSessionId = urlParams.get("session") || sessionStorage.getItem("pramana_last_session_id") || "demo-session";
+      let currentReport = null;
+
+      // DOM Elements
+      const entityNameEl = document.getElementById("entity-name-display");
+      const entityVerdictBadge = document.getElementById("entity-verdict-badge");
+      const entityVerdictText = document.getElementById("entity-verdict-text");
+      const metaGstin = document.getElementById("meta-gstin");
+      const metaPan = document.getElementById("meta-pan");
+      const metaIfsc = document.getElementById("meta-ifsc");
+      const metaBank = document.getElementById("meta-bank-name");
+      const sessionBadgeLabel = document.getElementById("session-badge-label");
+
+      const chatStream = document.getElementById("chat-stream");
+      const bodhForm = document.getElementById("bodh-query-form");
+      const bodhInput = document.getElementById("bodh-input");
+      const btnSubmit = document.getElementById("btn-submit");
+      const btnLoadSample = document.getElementById("btn-load-sample");
+
+      // Default Sample Report for instant queryability
+      const SAMPLE_REPORT = {
+        sessionId: "sample-preview",
+        overallResult: "VERIFIED",
+        narrativeSummary: "Acme Infotech Private Limited displays verified GST, PAN, and Bank Clearing alignment. All 6 verification stages passed statutory checks.",
+        documents: [
+          {
+            docType: "gst_certificate",
+            extractedFields: {
+              gstin: "27AAPFU0939F1ZV",
+              legalBusinessName: "Acme Infotech Private Limited",
+              address: "401-404, Tech Park, Andheri East, Mumbai, Maharashtra 400069",
+              dateOfRegistration: "01/07/2017"
+            },
+            tamperRisk: "low"
+          },
+          {
+            docType: "pan_card",
+            extractedFields: {
+              panNumber: "AAPFU0939F",
+              name: "Acme Infotech Private Limited",
+              dateOfBirth: "15/05/2015"
+            },
+            tamperRisk: "low"
+          },
+          {
+            docType: "cancelled_cheque",
+            extractedFields: {
+              accountHolderName: "Acme Infotech Private Limited",
+              accountNumber: "50200012345678",
+              ifsc: "HDFC0000060",
+              bankName: "HDFC Bank"
+            },
+            tamperRisk: "low"
+          }
+        ],
+        checks: [
+          { checkType: "gstin_checksum", result: "pass", detail: "GSTIN 27AAPFU0939F1ZV validated via ISO/IEC 7064 Mod-36 check digit 'V'." },
+          { checkType: "gstin_pan_match", result: "pass", detail: "Chars 3-12 of GSTIN (AAPFU0939F) exactly match applicant PAN." },
+          { checkType: "ifsc_lookup", result: "pass", detail: "IFSC HDFC0000060 verified in RBI Directory: HDFC Bank Fort Branch." },
+          { checkType: "name_cross_match", result: "pass", detail: "Entity name 'Acme Infotech Private Limited' matches 100% across all 3 documents." },
+          { checkType: "tamper_consistency", result: "pass", detail: "Forensic pixel anti-aliasing & typography uniform. No splice artifacts." }
+        ]
+      };
+
+      // 2. Load Session Report
+      async function loadSessionData() {
+        sessionBadgeLabel.textContent = `Session: ${currentSessionId.slice(-8)}`;
+
+        // Check sessionStorage first
+        const cachedRaw = sessionStorage.getItem("pramana_last_report");
+        if (cachedRaw) {
+          try {
+            currentReport = JSON.parse(cachedRaw);
+            renderApplicantBanner(currentReport);
+            return;
+          } catch(e) {}
+        }
+
+        // Try API fetch if sessionId exists and is not demo-session
+        if (currentSessionId && currentSessionId !== "demo-session") {
+          try {
+            const apiReport = await API.getReport(currentSessionId);
+            if (apiReport && (apiReport.documents?.length || apiReport.checks?.length)) {
+              currentReport = apiReport;
+              sessionStorage.setItem("pramana_last_report", JSON.stringify(apiReport));
+              renderApplicantBanner(apiReport);
+              return;
+            }
+          } catch(err) {
+            console.warn("[Bodh] Session fetch error, using sample data fallback:", err);
+          }
+        }
+
+        // Fallback to sample
+        currentReport = SAMPLE_REPORT;
+        renderApplicantBanner(SAMPLE_REPORT);
+      }
+
+      function renderApplicantBanner(report) {
+        if (!report) return;
+
+        // Find primary fields
+        let legalName = "Acme Infotech Private Limited";
+        let gstin = "27AAPFU0939F1ZV";
+        let pan = "AAPFU0939F";
+        let ifsc = "HDFC0000060";
+        let bank = "HDFC Bank";
+
+        if (report.documents && report.documents.length > 0) {
+          for (const doc of report.documents) {
+            const f = typeof doc.extractedFields === "string" ? JSON.parse(doc.extractedFields || "{}") : (doc.extractedFields || {});
+            if (f.legalBusinessName) legalName = f.legalBusinessName;
+            else if (f.name && legalName === "Acme Infotech Private Limited") legalName = f.name;
+
+            if (f.gstin) gstin = f.gstin;
+            if (f.panNumber) pan = f.panNumber;
+            if (f.ifsc) ifsc = f.ifsc;
+            if (f.bankName) bank = f.bankName;
+          }
+        }
+
+        entityNameEl.textContent = legalName;
+        metaGstin.textContent = gstin;
+        metaPan.textContent = pan;
+        metaIfsc.textContent = ifsc;
+        metaBank.textContent = bank;
+
+        const isTampered = report.overallResult === "ACTION_REQUIRED" || 
+                           report.overallResult === "REJECTED" || 
+                           report.documents?.some(d => d.tamperRisk === "high" || d.tamperRisk === "medium");
+
+        if (isTampered) {
+          entityVerdictBadge.className = "entity-verdict-pill pill-flagged";
+          entityVerdictBadge.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            <span>ACTION REQUIRED</span>
+          `;
+        } else {
+          entityVerdictBadge.className = "entity-verdict-pill pill-verified";
+          entityVerdictBadge.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>VERIFIED</span>
+          `;
+        }
+      }
+
+      // 3. Chat Logic
+      bodhForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const query = bodhInput.value.trim();
+        if (!query) return;
+
+        bodhInput.value = "";
+        await executeQuery(query);
+      });
+
+      // Clickable suggested chips
+      document.querySelectorAll(".suggested-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          const q = chip.getAttribute("data-q");
+          if (q) {
+            bodhInput.value = q;
+            executeQuery(q);
+          }
+        });
+      });
+
+      btnLoadSample.addEventListener("click", () => {
+        currentReport = SAMPLE_REPORT;
+        sessionStorage.setItem("pramana_last_report", JSON.stringify(SAMPLE_REPORT));
+        renderApplicantBanner(SAMPLE_REPORT);
+        appendAssistantMessage("Sample verified applicant **Acme Infotech Private Limited** reloaded. You can query any statutory detail, GSTIN Mod-36 checksum, or bank clearing code.");
+      });
+
+      async function executeQuery(questionText) {
+        appendUserMessage(questionText);
+
+        btnSubmit.disabled = true;
+        const typingEl = appendTypingIndicator();
+        scrollChatToBottom();
+
+        try {
+          const res = await API.askAgent(currentSessionId, questionText, currentReport);
+          typingEl.remove();
+
+          const answer = res.answer || "No response generated.";
+          const citations = res.citations || [];
+          appendAssistantMessage(answer, citations);
+        } catch (err) {
+          typingEl.remove();
+          appendAssistantMessage(`⚠️ **Unable to complete inquiry**: ${err.message || 'The AI service encountered a temporary timeout. Please try again.'}`, []);
+        } finally {
+          btnSubmit.disabled = false;
+          bodhInput.focus();
+          scrollChatToBottom();
+        }
+      }
+
+      function appendUserMessage(text) {
+        const group = document.createElement("div");
+        group.className = "msg-group user";
+        group.innerHTML = `
+          <span class="msg-author">You • Risk Underwriter</span>
+          <div class="msg-bubble-user">${escapeHtml(text)}</div>
+        `;
+        chatStream.appendChild(group);
+        scrollChatToBottom();
+      }
+
+      function appendAssistantMessage(markdownText, citations = []) {
+        const group = document.createElement("div");
+        group.className = "msg-group assistant";
+
+        let citationsHtml = "";
+        if (citations && citations.length > 0) {
+          citationsHtml = `
+            <div class="citations-panel">
+              <span class="citations-label">Statutory Citations:</span>
+              ${citations.map(c => `
+                <span class="citation-badge">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>${escapeHtml(typeof c === 'string' ? c : c.rule || c.docType || 'Statutory Source')}</span>
+                </span>
+              `).join("")}
+            </div>
+          `;
+        }
+
+        group.innerHTML = `
+          <span class="msg-author">Bodh (बोध) • Statutory Intelligence</span>
+          <div class="msg-bubble-assistant">
+            ${formatMarkdown(markdownText)}
+            ${citationsHtml}
+          </div>
+        `;
+        chatStream.appendChild(group);
+        scrollChatToBottom();
+      }
+
+      function appendTypingIndicator() {
+        const group = document.createElement("div");
+        group.className = "msg-group assistant";
+        group.innerHTML = `
+          <div class="typing-bubble">
+            <div class="typing-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span>Bodh is analyzing verified document evidence & statutory rules...</span>
+          </div>
+        `;
+        chatStream.appendChild(group);
+        return group;
+      }
+
+      function scrollChatToBottom() {
+        chatStream.scrollTop = chatStream.scrollHeight;
+      }
+
+      function escapeHtml(str) {
+        return (str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Lightweight Markdown Formatter
+      function formatMarkdown(text) {
+        if (!text) return "";
+        let html = escapeHtml(text);
+
+        // Bold: **text**
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Inline code: `code`
+        html = html.replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.06); padding:2px 5px; border-radius:4px; font-family:var(--font-mono); font-size:0.85em;">$1</code>');
+
+        // Split paragraphs & lists
+        const lines = html.split('\n');
+        let inList = false;
+        let result = [];
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            if (!inList) {
+              result.push('<ul style="margin: 0.5rem 0 0.75rem 1.4rem;">');
+              inList = true;
+            }
+            result.push(`<li>${trimmed.substring(2)}</li>`);
+          } else if (/^\d+\.\s/.test(trimmed)) {
+            if (!inList) {
+              result.push('<ol style="margin: 0.5rem 0 0.75rem 1.4rem;">');
+              inList = true;
+            }
+            result.push(`<li>${trimmed.replace(/^\d+\.\s/, '')}</li>`);
+          } else {
+            if (inList) {
+              result.push('</ul>');
+              inList = false;
+            }
+            if (trimmed.length > 0) {
+              result.push(`<p>${trimmed}</p>`);
+            }
+          }
+        }
+        if (inList) result.push('</ul>');
+
+        return result.join("");
+      }
+
+      // Initialize
+      loadSessionData();
+    })();
+  </script>
+</body>
+</html>

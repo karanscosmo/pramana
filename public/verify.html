@@ -817,6 +817,12 @@
       <a href="/login.html" id="verify-nav-login" class="back-home-link">
         <span>Sign In</span>
       </a>
+      <a href="/bodh.html" class="back-home-link link-to-bodh" style="border-color: rgba(11, 102, 77, 0.4); color: var(--seal-emerald); font-weight: 600;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>Bodh Copilot ↗</span>
+      </a>
       <div class="header-status">
         <span class="status-pulse-dot"></span>
         <span>6-Stage Verification Pipeline Active</span>
@@ -847,8 +853,14 @@
         </p>
       </div>
 
-      <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
         <span class="mono" style="font-size: 0.82rem; color: var(--ink-muted);" id="studio-session-id">Session: Not Started</span>
+        <a href="/bodh.html" class="nav-btn nav-btn-primary link-to-bodh" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; text-decoration: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; background: var(--seal-emerald); color: #fff; font-weight: 600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Open Bodh Copilot (Full Page) ↗</span>
+        </a>
         <button class="header-cta-btn" id="btn-open-audit-report" style="display: none;">View Official Verification Report</button>
       </div>
     </div>
@@ -1084,10 +1096,15 @@
                 Ask questions about the uploaded documents. Bodh retrieves verified document facts and answers with exact statutory citations.
               </p>
             </div>
-            <span class="rag-badge">
-              <span class="status-pulse-dot" style="width: 7px; height: 7px; flex-shrink: 0;"></span>
-              Real-Time RAG
-            </span>
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+              <a href="/bodh.html" class="link-to-bodh" style="font-size: 0.76rem; font-weight: 600; color: var(--seal-emerald); background: #ffffff; border: 1px solid rgba(11, 102, 77, 0.3); padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                <span>Open in Dedicated View ↗</span>
+              </a>
+              <span class="rag-badge">
+                <span class="status-pulse-dot" style="width: 7px; height: 7px; flex-shrink: 0;"></span>
+                Real-Time RAG
+              </span>
+            </div>
           </div>
 
           <!-- Suggested Questions Pills -->
@@ -1207,6 +1224,7 @@
     } catch(e) {}
     let sseClient = null;
     let currentChecks = [];
+    let isDemoMode = false;
     const selectedFiles = {
       gst_certificate: null,
       pan_card: null,
@@ -1245,6 +1263,7 @@
 
       inputEl.addEventListener("change", (e) => {
         if (e.target.files && e.target.files[0]) {
+          isDemoMode = false;
           handleFileChosen(e.target.files[0], docTypeKey, thumbId, nameId, sizeId, emptyId, loadedId, dropEl);
         }
       });
@@ -1262,6 +1281,7 @@
         e.preventDefault();
         dropEl.classList.remove("dragover");
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          isDemoMode = false;
           handleFileChosen(e.dataTransfer.files[0], docTypeKey, thumbId, nameId, sizeId, emptyId, loadedId, dropEl);
         }
       });
@@ -1293,6 +1313,7 @@
 
     // Load Demo Test Documents
     btnLoadTampered.addEventListener("click", async () => {
+      isDemoMode = true;
       logTelemetry("[DEMO] Loading curated test fixtures with altered PAN Card...", true);
       await loadTestFile("/demo_fixtures/pan_card_altered.jpg", "pan_card_altered.jpg", "pan_card", "thumb-pan", "name-pan", "size-pan", "drop-pan-empty", "drop-pan-loaded", dropPan);
       await loadTestFile("/demo_fixtures/gst_certificate_genuine.jpg", "gst_certificate_genuine.jpg", "gst_certificate", "thumb-gst", "name-gst", "size-gst", "drop-gst-empty", "drop-gst-loaded", dropGst);
@@ -1301,6 +1322,7 @@
     });
 
     btnLoadClean.addEventListener("click", async () => {
+      isDemoMode = true;
       logTelemetry("[DEMO] Loading curated genuine test fixtures...", true);
       await loadTestFile("/demo_fixtures/pan_card_genuine.jpg", "pan_card_genuine.jpg", "pan_card", "thumb-pan", "name-pan", "size-pan", "drop-pan-empty", "drop-pan-loaded", dropPan);
       await loadTestFile("/demo_fixtures/gst_certificate_genuine.jpg", "gst_certificate_genuine.jpg", "gst_certificate", "thumb-gst", "name-gst", "size-gst", "drop-gst-empty", "drop-gst-loaded", dropGst);
@@ -1320,6 +1342,7 @@
     }
 
     btnClear.addEventListener("click", () => {
+      isDemoMode = false;
       resetStudio();
       logTelemetry("[CLEAR] All documents cleared. Ready for fresh upload.");
     });
@@ -1433,11 +1456,16 @@
         currentSessionId = sessRes.sessionId;
         document.getElementById("studio-session-id").textContent = `Session: ${currentSessionId.slice(-8)}`;
 
+        // Update all links pointing to Bodh
+        document.querySelectorAll('.link-to-bodh').forEach(el => {
+          el.href = `/bodh.html?session=${encodeURIComponent(currentSessionId)}`;
+        });
+
         setStep("step-extraction", "active");
         logTelemetry(`[BUNDLE] Sending all ${activeFiles.length} documents in atomic verification bundle...`);
 
         // Step 2: Atomic single-trip bundle verification (guarantees cross-document persistence and sub-second execution)
-        const bundleRes = await API.verifyBundle(currentSessionId, selectedFiles);
+        const bundleRes = await API.verifyBundle(currentSessionId, selectedFiles, isDemoMode);
         const report = bundleRes.report || await API.getReport(currentSessionId);
 
         if (report) {
@@ -1446,24 +1474,12 @@
 
         enableCopilot();
       } catch (err) {
-        console.warn("[Pramana] Atomic bundle verify fallback to sequential upload:", err);
-        try {
-          // Sequential upload fallback
-          for (const [docType, file] of activeFiles) {
-            logTelemetry(`[UPLOAD] Sending ${docType} (${file.name}) to pipeline...`);
-            await API.uploadDocument(currentSessionId, docType, file);
-            setStep("step-extraction", "passed");
-            setStep("step-tamper", "active");
-          }
-          const report = await API.getReport(currentSessionId);
-          if (report) await applyVerificationReport(report);
-          enableCopilot();
-        } catch (innerErr) {
-          updateVerdict("flagged", "Verification Error", innerErr.message);
-          logTelemetry(`[ERROR] ${innerErr.message}`, true);
-          btnStart.disabled = false;
-          btnStart.innerHTML = `<span>Run 6-Stage Verification Pipeline</span>`;
-        }
+        console.error("[Pramana] Verification error:", err);
+        updateVerdict("flagged", "Verification Interrupted", err.message || "Pipeline encountered a timeout. Please retry.");
+        logTelemetry(`[ERROR] Verification pipeline interrupted: ${err.message}`, true);
+        setStep("step-extraction", "failed");
+        btnStart.disabled = false;
+        btnStart.innerHTML = `<span>Run 6-Stage Verification Pipeline</span>`;
       }
     });
 

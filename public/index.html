@@ -35,6 +35,7 @@
     </div>
 
     <div style="display: flex; align-items: center; gap: 0.65rem;" id="header-auth-actions">
+      <a href="/bodh.html" class="header-nav-link" style="color: var(--seal-emerald); font-weight: 600;">Bodh Copilot</a>
       <a href="/login.html" id="nav-login-link" class="header-nav-link">Sign In</a>
       <a href="/signup.html" id="nav-signup-link" class="header-signup-btn">Create Account</a>
       <a href="/verify.html" class="header-cta-btn">Open Verification Studio</a>
@@ -52,6 +53,7 @@
           const container = document.getElementById('header-auth-actions');
           if (container) {
             container.innerHTML = `
+              <a href="/bodh.html" class="header-nav-link" style="color: var(--seal-emerald); font-weight: 600;">Bodh Copilot</a>
               <a href="/dashboard.html" class="header-dashboard-btn">
                 Dashboard (${user.fullName.split(' ')[0]})
               </a>

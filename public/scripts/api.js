@@ -70,15 +70,19 @@ export const API = {
     return res.json();
   },
 
-  async verifyBundle(sessionId, filesMap) {
+  async verifyBundle(sessionId, filesMap, isDemo = false) {
     const formData = new FormData();
     for (const [docType, file] of Object.entries(filesMap)) {
       if (file) {
         formData.append(docType, file);
       }
     }
+    if (isDemo) {
+      formData.append('isDemo', 'true');
+    }
+    const query = isDemo ? '?demo=true' : '';
 
-    const res = await fetch(`/api/session/${sessionId}/verify-bundle`, {
+    const res = await fetch(`/api/session/${sessionId}/verify-bundle${query}`, {
       method: 'POST',
       headers: {
         ...this.getAuthHeaders()
