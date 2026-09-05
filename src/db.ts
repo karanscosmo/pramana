@@ -86,7 +86,7 @@ export async function initDb() {
     isInitialized = true;
   } catch (err) {
     // Non-fatal if tables already created or external DB used
-    console.log("[Nirnay DB] Note on schema initialization:", err);
+    console.log("[Pramana DB] Note on schema initialization:", err);
     isInitialized = true;
   }
 }

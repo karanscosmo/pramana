@@ -101,7 +101,7 @@ export async function verifyIfscCode(ifsc: string, claimedBankName?: string): Pr
       timeout: 6000,
       headers: {
         Accept: "application/json",
-        "User-Agent": "Nirnay-KYB-Verification/1.0",
+        "User-Agent": "Pramana-KYB-Verification/1.0",
       },
     });
 

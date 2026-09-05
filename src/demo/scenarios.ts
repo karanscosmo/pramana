@@ -277,7 +277,7 @@ export const DEMO_SCENARIOS: Record<string, DemoScenario> = {
     id: "low-confidence",
     title: "6. Honest OCR Degradation — Low Confidence Alert",
     badge: "low_confidence",
-    description: "Bad scan with smudged ink and glare. Rather than asserting a confident wrong answer, Nirnay surfaces extractionConfidence (0.48) and flags document as insufficient.",
+    description: "Bad scan with smudged ink and glare. Rather than asserting a confident wrong answer, Pramana surfaces extractionConfidence (0.48) and flags document as insufficient.",
     expectedResult: "insufficient_documents",
     flagReason: "Document visual quality below 0.70 threshold. Manual re-upload requested.",
     documents: [

@@ -35,7 +35,7 @@ class VerificationOrchestrator {
     this.sendToResponse(res, {
       type: "session_created",
       sessionId,
-      payload: { message: "SSE stream established with Nirnay verification pipeline." },
+      payload: { message: "SSE stream established with Pramana verification pipeline." },
     });
   }
 

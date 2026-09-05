@@ -1,7 +1,7 @@
 {
   "name": "pramana-backend",
   "version": "1.0.0",
-  "description": "Nirnay - KYB Document Verification Agent with Deterministic & Explainable Evidence Trail",
+  "description": "Pramana - KYB Document Verification Agent with Deterministic & Explainable Evidence Trail",
   "main": "dist/server.js",
   "scripts": {
     "build": "prisma generate && tsc",

@@ -1,6 +1,10 @@
 export const API = {
+  getToken() {
+    return localStorage.getItem('pramana_token') || localStorage.getItem('nirnay_token');
+  },
+
   getAuthHeaders() {
-    const token = localStorage.getItem('nirnay_token');
+    const token = this.getToken();
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   },
 
@@ -31,7 +35,7 @@ export const API = {
 
     // If session creation failed with stored token (e.g. stale user on newly rotated serverless container), retry cleanly
     if (!res.ok && this.getToken()) {
-      console.warn("[Nirnay API] Session creation failed with token, retrying clean anonymous session...");
+      console.warn("[Pramana API] Session creation failed with token, retrying clean anonymous session...");
       res = await fetch('/api/session', {
         method: 'POST',
         headers: {

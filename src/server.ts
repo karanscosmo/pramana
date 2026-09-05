@@ -17,7 +17,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const JWT_SECRET = process.env.JWT_SECRET || "nirnay_merchants_secret_2026";
+const JWT_SECRET = process.env.JWT_SECRET || "pramana_merchants_secret_2026";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -65,7 +65,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   try {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
   } catch (e) {
-    console.warn("[Nirnay] Could not create uploads dir:", e);
+    console.warn("[Pramana] Could not create uploads dir:", e);
   }
 }
 
@@ -94,7 +94,7 @@ app.use(async (_req: Request, _res: Response, next: () => void) => {
   try {
     await initDb();
   } catch (err) {
-    console.error("[Nirnay] Database initialization error:", err);
+    console.error("[Pramana] Database initialization error:", err);
   }
   next();
 });
@@ -109,7 +109,7 @@ app.use("/uploads", express.static(UPLOADS_DIR));
 app.get("/api", (_req: Request, res: Response) => {
   res.json({
     status: "healthy",
-    service: "Nirnay KYB Verification Agent",
+    service: "Pramana KYB Verification Agent",
     version: "1.0.0",
     claudeVisionAvailable: Boolean(ANTHROPIC_API_KEY),
     endpoints: {
@@ -132,7 +132,7 @@ app.get("/api", (_req: Request, res: Response) => {
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({
     status: "healthy",
-    service: "Nirnay KYB Verification Agent",
+    service: "Pramana KYB Verification Agent",
     timestamp: new Date().toISOString(),
     claudeVisionAvailable: Boolean(ANTHROPIC_API_KEY),
   });
@@ -160,7 +160,7 @@ interface MerchantRecord {
   plainPassword?: string;
 }
 
-const MERCHANTS_STORE_PATH = path.join("/tmp", "nirnay_merchants.json");
+const MERCHANTS_STORE_PATH = path.join("/tmp", "pramana_merchants.json");
 const GLOBAL_MERCHANTS = new Map<string, MerchantRecord>();
 
 function loadMerchantsStore() {
@@ -227,6 +227,16 @@ loadReportsStore();
 
 const PRE_SEEDED_ACCOUNTS = [
   {
+    email: "demo@pramana.ai",
+    passwords: ["pramana2026", "demo123", "password", "123456"],
+    fullName: "Aravind Sharma",
+    businessName: "Acme Infotech Private Limited",
+    businessType: "private_limited",
+    phone: "9820012345",
+    city: "Mumbai",
+    state: "Maharashtra",
+  },
+  {
     email: "demo@nirnay.ai",
     passwords: ["pramana2026", "demo123", "password", "123456"],
     fullName: "Aravind Sharma",
@@ -247,10 +257,20 @@ const PRE_SEEDED_ACCOUNTS = [
     state: "Maharashtra",
   },
   {
+    email: "admin@pramana.ai",
+    passwords: ["pramana2026", "admin123", "123456"],
+    fullName: "Lead Underwriter",
+    businessName: "Pramana Risk Intelligence",
+    businessType: "private_limited",
+    phone: "9820000000",
+    city: "Bengaluru",
+    state: "Karnataka",
+  },
+  {
     email: "admin@nirnay.ai",
     passwords: ["pramana2026", "admin123", "123456"],
     fullName: "Lead Underwriter",
-    businessName: "Nirnay Risk Intelligence",
+    businessName: "Pramana Risk Intelligence",
     businessType: "private_limited",
     phone: "9820000000",
     city: "Bengaluru",
@@ -673,7 +693,7 @@ async function resolveValidUserId(req: AuthenticatedRequest): Promise<string | n
       });
     }
   } catch (err) {
-    console.warn("[Nirnay] User resolution safe fallback to anonymous session:", err);
+    console.warn("[Pramana] User resolution safe fallback to anonymous session:", err);
   }
   return null;
 }
@@ -697,7 +717,7 @@ app.post("/api/session", optionalAuthMiddleware, async (req: AuthenticatedReques
       createdAt: session.createdAt,
     });
   } catch (error: any) {
-    console.error("[Nirnay Session] Creation error:", error);
+    console.error("[Pramana Session] Creation error:", error);
     res.status(500).json({ error: "Failed to create verification session", message: error.message });
   }
 });
@@ -906,7 +926,7 @@ app.post("/api/session/:id/verify-bundle", upload.any(), async (req: Request, re
       report,
     });
   } catch (error: any) {
-    console.error("[Nirnay Bundle] Error:", error);
+    console.error("[Pramana Bundle] Error:", error);
     res.status(500).json({ error: "Bundle verification failed", message: error.message });
   }
 });
@@ -1168,7 +1188,7 @@ export async function startServer() {
   await initDb();
   return app.listen(PORT, () => {
     console.log(`\n======================================================`);
-    console.log(`🛡️  Nirnay KYB Document Verification Agent active`);
+    console.log(`🛡️  Pramana KYB Document Verification Agent active`);
     console.log(`   Port: ${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/api/health`);
     console.log(`   Scenarios: http://localhost:${PORT}/api/demo/scenarios`);

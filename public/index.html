@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nirnay (प्रमाण) — Autonomous Document Verification & Ground Truth</title>
-  <meta name="description" content="Nirnay reads a business's onboarding documents — GST certificate, PAN card, cancelled cheque — extracts every key field, and cross-verifies them deterministically and against live public registries.">
+  <title>Pramana (प्रमाण) — Autonomous Document Verification & Ground Truth</title>
+  <meta name="description" content="Pramana reads a business's onboarding documents — GST certificate, PAN card, cancelled cheque — extracts every key field, and cross-verifies them deterministically and against live public registries.">
   
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230b664d'/><path d='M30 50 L44 64 L70 36' fill='none' stroke='%23ffffff' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/></svg>">
@@ -24,7 +24,7 @@
         <circle cx="86" cy="50" r="3" fill="currentColor" />
       </svg>
       <div class="brand-title">
-        Nirnay
+        Pramana
         <span class="brand-sanskrit">प्रमाण</span>
       </div>
     </a>
@@ -44,8 +44,8 @@
   <script>
     // Check if merchant is logged in
     (function checkAuth() {
-      const token = localStorage.getItem('nirnay_token');
-      const userStr = localStorage.getItem('nirnay_user');
+      const token = localStorage.getItem('pramana_token') || localStorage.getItem('nirnay_token');
+      const userStr = localStorage.getItem('pramana_user') || localStorage.getItem('nirnay_user');
       if (token && userStr) {
         try {
           const user = JSON.parse(userStr);
@@ -126,7 +126,7 @@
             Whenever a shopkeeper or business opens an account, someone has to check their GST certificate, PAN card, and bank cheque by eye. Matching tiny numbers and spelling differences takes hours — and fake papers can easily slip through.
           </p>
           <div style="background: rgba(17, 16, 14, 0.85); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(52, 211, 153, 0.35); border-left: 4px solid #34d399; padding: 1rem 1.25rem; border-radius: 0 10px 10px 0; margin-top: 1.25rem; font-size: 0.92rem; line-height: 1.6; color: #f3f0ea; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);">
-            <strong style="color: #34d399; font-weight: 700;">How is Nirnay different?</strong> Most verification APIs return a pass/fail code for another system to consume. Nirnay is built to be watched and understood by a person — every check shows its evidence, every document is checked for internal tampering, and every session ends in a memo a human can actually read.
+            <strong style="color: #34d399; font-weight: 700;">How is Pramana different?</strong> Most verification APIs return a pass/fail code for another system to consume. Pramana is built to be watched and understood by a person — every check shows its evidence, every document is checked for internal tampering, and every session ends in a memo a human can actually read.
           </div>
           <div class="beat-meta-row">
             <span class="beat-chip">GST Certificate</span>
@@ -144,7 +144,7 @@
             <em>Even from folded paper and phone photos.</em>
           </h2>
           <p class="beat-body">
-            Nirnay reads paper scans, PDFs, and mobile phone photos accurately. If a photo is blurry, torn, or has faded ink, it clearly tells you instead of making wild guesses. You get clean details extracted with 100% honesty.
+            Pramana reads paper scans, PDFs, and mobile phone photos accurately. If a photo is blurry, torn, or has faded ink, it clearly tells you instead of making wild guesses. You get clean details extracted with 100% honesty.
           </p>
           <div class="beat-meta-row">
             <span class="beat-chip">Clear Text Reading</span>
@@ -214,9 +214,9 @@
         </svg>
         The 6 Core Verification Stages
       </div>
-      <h2 class="bench-title">How Nirnay catches fraud: 6 clear pipeline stages anyone can verify.</h2>
+      <h2 class="bench-title">How Pramana catches fraud: 6 clear pipeline stages anyone can verify.</h2>
       <p class="bench-description">
-        Saying "the AI feels confident" is not good enough for financial safety. Nirnay uses AI to read documents and inspect typography, but relies on official government rules, bank clearing registries, and human-readable underwriting memos to decide what is true.
+        Saying "the AI feels confident" is not good enough for financial safety. Pramana uses AI to read documents and inspect typography, but relies on official government rules, bank clearing registries, and human-readable underwriting memos to decide what is true.
       </p>
     </header>
 
@@ -235,7 +235,7 @@
             <div class="pillar-number">PILLAR 01 • STRUCTURAL EMBED</div>
             <h3 class="pillar-heading">PAN matches GST Number</h3>
             <p class="pillar-body">
-              By government design, letters 3 to 12 of every 15-character Indian GST number are the exact PAN. Nirnay compares them directly — catching mismatched or borrowed PAN cards instantly without needing any internet connection.
+              By government design, letters 3 to 12 of every 15-character Indian GST number are the exact PAN. Pramana compares them directly — catching mismatched or borrowed PAN cards instantly without needing any internet connection.
             </p>
             <div class="pillar-card-footer">
               <div class="pillar-statutory-tag">Official GST Council Rule</div>
@@ -253,7 +253,7 @@
             <div class="pillar-number">PILLAR 02 • CHECKSUM FORMULA</div>
             <h3 class="pillar-heading">GST Number Math Formula</h3>
             <p class="pillar-body">
-              The 15th digit of every GST number is calculated from the first 14 letters using a government math formula (Modulo-36). Nirnay recalculates it instantly — catching fake numbers and typing mistakes on the spot.
+              The 15th digit of every GST number is calculated from the first 14 letters using a government math formula (Modulo-36). Pramana recalculates it instantly — catching fake numbers and typing mistakes on the spot.
             </p>
             <div class="pillar-card-footer">
               <div class="pillar-statutory-tag">Official 15th-Digit Checksum Rule</div>
@@ -271,7 +271,7 @@
             <div class="pillar-number">PILLAR 03 • CLEARING REGISTRY</div>
             <h3 class="pillar-heading">Live Bank IFSC Search</h3>
             <p class="pillar-body">
-              Nirnay checks the IFSC code on the cheque against Razorpay's live national bank directory. It verifies the bank name, branch address, and confirms if NEFT/UPI transfers work. Fake bank codes get caught immediately.
+              Pramana checks the IFSC code on the cheque against Razorpay's live national bank directory. It verifies the bank name, branch address, and confirms if NEFT/UPI transfers work. Fake bank codes get caught immediately.
             </p>
             <div class="pillar-card-footer">
               <div class="pillar-statutory-tag">Live Razorpay Bank Database</div>
@@ -344,7 +344,7 @@
             <div class="pillar-number">PILLAR 01 • STRUCTURAL EMBED</div>
             <h3 class="pillar-heading">PAN matches GST Number</h3>
             <p class="pillar-body">
-              By government design, letters 3 to 12 of every 15-character Indian GST number are the exact PAN. Nirnay compares them directly — catching mismatched or borrowed PAN cards instantly without needing any internet connection.
+              By government design, letters 3 to 12 of every 15-character Indian GST number are the exact PAN. Pramana compares them directly — catching mismatched or borrowed PAN cards instantly without needing any internet connection.
             </p>
             <div class="pillar-card-footer">
               <div class="pillar-statutory-tag">Official GST Council Rule</div>
@@ -362,7 +362,7 @@
             <div class="pillar-number">PILLAR 02 • CHECKSUM FORMULA</div>
             <h3 class="pillar-heading">GST Number Math Formula</h3>
             <p class="pillar-body">
-              The 15th digit of every GST number is calculated from the first 14 letters using a government math formula (Modulo-36). Nirnay recalculates it instantly — catching fake numbers and typing mistakes on the spot.
+              The 15th digit of every GST number is calculated from the first 14 letters using a government math formula (Modulo-36). Pramana recalculates it instantly — catching fake numbers and typing mistakes on the spot.
             </p>
             <div class="pillar-card-footer">
               <div class="pillar-statutory-tag">Official 15th-Digit Checksum Rule</div>
@@ -380,7 +380,7 @@
             <div class="pillar-number">PILLAR 03 • CLEARING REGISTRY</div>
             <h3 class="pillar-heading">Live Bank IFSC Search</h3>
             <p class="pillar-body">
-              Nirnay checks the IFSC code on the cheque against Razorpay's live national bank directory. It verifies the bank name, branch address, and confirms if NEFT/UPI transfers work. Fake bank codes get caught immediately.
+              Pramana checks the IFSC code on the cheque against Razorpay's live national bank directory. It verifies the bank name, branch address, and confirms if NEFT/UPI transfers work. Fake bank codes get caught immediately.
             </p>
             <div class="pillar-card-footer">
               <div class="pillar-statutory-tag">Live Razorpay Bank Database</div>
@@ -513,7 +513,7 @@
       <div class="closing-content-wrapper">
         <h2 class="closing-title">Fast, honest document verification for Indian businesses.</h2>
         <p class="closing-sub">
-          Nirnay stops manual errors and catches fake documents in seconds, giving your team complete proof for every onboarding.
+          Pramana stops manual errors and catches fake documents in seconds, giving your team complete proof for every onboarding.
         </p>
         <div class="closing-button-group">
           <a href="/verify.html" class="primary-audit-btn">
@@ -531,7 +531,7 @@
   <!-- EDITORIAL FOOTER -->
   <footer class="site-footer">
     <div>
-      <strong>Nirnay (प्रमाण)</strong> • Automated Business Document Verification for India
+      <strong>Pramana (प्रमाण)</strong> • Automated Business Document Verification for India
     </div>
     <div class="mono" style="font-size: 0.78rem;">
       Live Public Checks: Razorpay Bank Directory • Official GST Council Rules

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nirnay Studio — Real Document Verification & Live RAG Intelligence</title>
-  <meta name="description" content="Nirnay Real-World Studio: Upload business documents, execute real OCR extraction, run tamper-consistency checks, statutory compliance checks, and underwriter narrative synthesis.">
+  <title>Pramana Studio — Real Document Verification & Live RAG Intelligence</title>
+  <meta name="description" content="Pramana Real-World Studio: Upload business documents, execute real OCR extraction, run tamper-consistency checks, statutory compliance checks, and underwriter narrative synthesis.">
   
   <link rel="stylesheet" href="styles.css">
   <style>
@@ -799,7 +799,7 @@
         <path d="M34 50 L45 61 L68 38" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
       <div class="brand-title">
-        Nirnay
+        Pramana
         <span class="brand-sanskrit">Studio</span>
       </div>
     </a>
@@ -826,7 +826,7 @@
 
   <script>
     (function checkVerifyAuth() {
-      const token = localStorage.getItem('nirnay_token');
+      const token = localStorage.getItem('pramana_token') || localStorage.getItem('nirnay_token');
       if (token) {
         const dashBtn = document.getElementById('verify-nav-dash');
         const loginBtn = document.getElementById('verify-nav-login');
@@ -843,7 +843,7 @@
       <div>
         <h1 class="studio-heading">6-Stage KYB Document Verification Studio</h1>
         <p class="studio-subheading">
-          Upload genuine business onboarding documents or test our forensic tamper suite. Nirnay reads files with Optical Character Recognition, executes internal tamper checks (Stage 5), enforces statutory government rules, queries live bank clearing directories, and synthesizes a human-readable underwriter narrative (Stage 6).
+          Upload genuine business onboarding documents or test our forensic tamper suite. Pramana reads files with Optical Character Recognition, executes internal tamper checks (Stage 5), enforces statutory government rules, queries live bank clearing directories, and synthesizes a human-readable underwriter narrative (Stage 6).
         </p>
       </div>
 
@@ -1446,7 +1446,7 @@
 
         enableCopilot();
       } catch (err) {
-        console.warn("[Nirnay] Atomic bundle verify fallback to sequential upload:", err);
+        console.warn("[Pramana] Atomic bundle verify fallback to sequential upload:", err);
         try {
           // Sequential upload fallback
           for (const [docType, file] of activeFiles) {
