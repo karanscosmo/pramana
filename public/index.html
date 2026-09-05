@@ -52,7 +52,12 @@
           const container = document.getElementById('header-auth-actions');
           if (container) {
             container.innerHTML = `
-              <a href="/bodh.html" class="header-nav-link" style="color: var(--seal-emerald); font-weight: 600;">Bodh Copilot</a>
+              <a href="/bodh.html" class="header-cta-btn" style="background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.4); color: #ffffff; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: #34d399;">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>Bodh Copilot</span>
+              </a>
               <a href="/dashboard.html" class="header-dashboard-btn">
                 Dashboard (${user.fullName.split(' ')[0]})
               </a>
