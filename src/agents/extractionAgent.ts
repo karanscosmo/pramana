@@ -3,11 +3,13 @@ import fs from "fs";
 import path from "path";
 import Tesseract from "tesseract.js";
 import { DocType, ExtractedFields, ExtractionOutput, GstFields, PanFields, ChequeFields } from "../types/index.js";
+import { CLAUDE_MODEL, VISION_TIMEOUT_MS, OCR_TIMEOUT_MS } from "../config/constants.js";
 
 /**
  * Parses and extracts structured fields from uploaded business documents.
- * Supports Claude Vision (Claude 3.5 Sonnet) when ANTHROPIC_API_KEY is available,
- * and real local Tesseract.js OCR engine for genuine image/document parsing with zero seeded data.
+ * Supports Claude Vision when ANTHROPIC_API_KEY is available,
+ * and genuine local Tesseract.js OCR engine for image/document parsing with zero seeded data.
+ * Document content is always genuinely extracted regardless of file name.
  */
 export async function extractDocumentFields(
   filePath: string,
@@ -16,35 +18,20 @@ export async function extractDocumentFields(
   apiKey?: string,
   originalName?: string
 ): Promise<ExtractionOutput> {
-  const fileName = (originalName || path.basename(filePath)).toLowerCase();
-
-  // Instant ultra-fast recognition for project sample documents (runs in < 1ms on Vercel & local)
-  const isSampleDoc =
-    fileName.includes("gst_certificate") ||
-    fileName.includes("pan_card") ||
-    fileName.includes("cancelled_cheque") ||
-    fileName.includes("cheque_genuine") ||
-    fileName.includes("pan_card_altered") ||
-    fileName.includes("pan_card_genuine");
-
-  if (isSampleDoc) {
-    return extractWithRealTesseractOCR(filePath, docTypeHint, originalName);
-  }
-
-  // If Anthropic API key is provided and file exists, invoke Claude Vision with strict 3500ms timeout
+  // If Anthropic API key is provided and file exists, invoke Claude Vision with generous 25s timeout
   if (apiKey && fs.existsSync(filePath)) {
     try {
       const visionPromise = extractWithClaudeVision(filePath, docTypeHint, mimeType, apiKey);
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Claude Vision extraction timeout")), 3500)
+        setTimeout(() => reject(new Error(`Claude Vision extraction timed out after ${VISION_TIMEOUT_MS}ms`)), VISION_TIMEOUT_MS)
       );
       return await Promise.race([visionPromise, timeoutPromise]);
     } catch (err: any) {
-      console.warn("Claude Vision extraction failed or timed out, using real Tesseract OCR:", err.message);
+      console.warn(`[ExtractionAgent] Claude Vision extraction failed or timed out (${err.message}). Falling back to genuine Tesseract OCR.`);
     }
   }
 
-  // Real Local OCR Engine using Tesseract.js directly on the uploaded file
+  // Genuine Local OCR Engine using Tesseract.js directly on the uploaded file
   return extractWithRealTesseractOCR(filePath, docTypeHint, originalName);
 }
 
@@ -86,7 +73,7 @@ Field requirements by type:
   const mediaType = validMediaTypes.includes(mimeType) ? (mimeType as any) : "image/jpeg";
 
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
+    model: CLAUDE_MODEL,
     max_tokens: 1500,
     messages: [
       {
@@ -145,82 +132,11 @@ async function extractWithRealTesseractOCR(filePath: string, docType: DocType, o
     };
   }
 
-  const fileName = (originalName || path.basename(filePath)).toLowerCase();
-
-  // Instant ultra-fast recognition for project sample documents (runs in < 1ms on Vercel)
-  if (fileName.includes("gst_certificate") || (fileName.includes("gst") && !fileName.includes("pan"))) {
-    if (docType === "gst_certificate") {
-      return {
-        docType: "gst_certificate",
-        fields: {
-          gstin: "27AAPFU0939F1ZV",
-          legalBusinessName: "Acme Infotech Private Limited",
-          tradeName: "Acme Tech Solutions",
-          address: "Unit 401, Tech Park, MIDC Andheri East, Mumbai 400069",
-          dateOfRegistration: "15/07/2018",
-        },
-        confidence: 0.98,
-        confidenceBreakdown: { fieldCompleteness: 1.0, visualQuality: 0.96, structuralIntegrity: 0.99 },
-        rawTextPreview: "FORM GST REG-06 - REGISTRATION CERTIFICATE - GSTIN: 27AAPFU0939F1ZV - ACME INFOTECH PRIVATE LIMITED",
-      };
-    }
-  }
-
-  if (fileName.includes("pan_card_altered") || fileName.includes("altered")) {
-    if (docType === "pan_card") {
-      return {
-        docType: "pan_card",
-        fields: {
-          panNumber: "AAPFU0939X",
-          name: "Acme Infotech Private Limited",
-          dateOfBirth: "12/03/2016",
-        },
-        confidence: 0.96,
-        confidenceBreakdown: { fieldCompleteness: 1.0, visualQuality: 0.94, structuralIntegrity: 0.97 },
-        rawTextPreview: "INCOME TAX DEPARTMENT - GOVT OF INDIA - PERMANENT ACCOUNT NUMBER: AAPFU0939X",
-      };
-    }
-  }
-
-  if (fileName.includes("pan_card") || fileName.includes("pan")) {
-    if (docType === "pan_card") {
-      return {
-        docType: "pan_card",
-        fields: {
-          panNumber: "AAPFU0939F",
-          name: "Acme Infotech Private Limited",
-          dateOfBirth: "12/03/2016",
-        },
-        confidence: 0.97,
-        confidenceBreakdown: { fieldCompleteness: 1.0, visualQuality: 0.95, structuralIntegrity: 0.98 },
-        rawTextPreview: "INCOME TAX DEPARTMENT - GOVT OF INDIA - PERMANENT ACCOUNT NUMBER: AAPFU0939F",
-      };
-    }
-  }
-
-  if (fileName.includes("cheque") || fileName.includes("check") || fileName.includes("bank")) {
-    if (docType === "cancelled_cheque" || docType === "bank_proof") {
-      return {
-        docType: "cancelled_cheque",
-        fields: {
-          accountNumber: "50200034189210",
-          ifsc: "HDFC0000060",
-          accountHolderName: "Acme Infotech Private Limited",
-          bankName: "HDFC Bank",
-          branch: "Kanjurmarg, Mumbai",
-        },
-        confidence: 0.98,
-        confidenceBreakdown: { fieldCompleteness: 1.0, visualQuality: 0.97, structuralIntegrity: 0.99 },
-        rawTextPreview: "HDFC BANK LTD - KANJURMARG - A/C 50200034189210 - IFSC: HDFC0000060 - ACME INFOTECH PVT LTD",
-      };
-    }
-  }
-
   try {
-    // Perform OCR recognition with strict 3000ms timeout so Vercel serverless never stalls
+    // Perform genuine OCR recognition using Tesseract.js directly on document pixels
     const ocrPromise = Tesseract.recognize(filePath, "eng");
     const timeoutPromise = new Promise<any>((_, reject) =>
-      setTimeout(() => reject(new Error("OCR_TIMEOUT")), 3000)
+      setTimeout(() => reject(new Error("OCR_TIMEOUT")), OCR_TIMEOUT_MS)
     );
 
     const ocrResult = await Promise.race([ocrPromise, timeoutPromise]).catch(() => null);

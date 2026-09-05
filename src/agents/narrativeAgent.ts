@@ -1,24 +1,27 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { DocType } from "../types/index.js";
+import { CLAUDE_MODEL, TEXT_TIMEOUT_MS } from "../config/constants.js";
 
 export interface SessionEvidenceContext {
   sessionId: string;
   overallResult: string | null;
   documents: Array<{
-    id: string;
+    id?: string;
     docType: string;
-    rawFileUrl: string;
-    extractedFields: any;
+    rawFileUrl?: string;
+    extractedFields?: any;
     extractionConfidence: number;
     tamperRisk?: string | null;
     tamperFlags?: any;
     tamperSummary?: string | null;
+    fields?: Record<string, any>;
   }>;
   checks: Array<{
-    id: string;
+    id?: string;
     checkType: string;
     result: string;
     detail: string;
-    evidence: any;
+    evidence?: any;
   }>;
 }
 
@@ -31,16 +34,16 @@ export async function generateUnderwriterNarrative(
   context: SessionEvidenceContext,
   apiKey?: string
 ): Promise<string> {
-  // If Anthropic API key is present, generate with Claude 3.5 Sonnet (with strict 3500ms timeout)
+  // If Anthropic API key is present, generate with Claude (with generous 15s timeout)
   if (apiKey) {
     try {
       const claudePromise = generateNarrativeWithClaude(context, apiKey);
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Claude narrative timeout")), 3500)
+        setTimeout(() => reject(new Error(`Claude narrative timed out after ${TEXT_TIMEOUT_MS}ms`)), TEXT_TIMEOUT_MS)
       );
       return await Promise.race([claudePromise, timeoutPromise]);
     } catch (err: any) {
-      console.warn("Claude Underwriter Narrative synthesis fallback:", err.message);
+      console.warn(`[NarrativeAgent] Claude Underwriter Narrative synthesis fallback (${err.message}). Using deterministic synthesizer.`);
     }
   }
 
@@ -90,7 +93,7 @@ AUDIT EVIDENCE RECORD:
 ${JSON.stringify(summaryData, null, 2)}`;
 
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
+    model: CLAUDE_MODEL,
     max_tokens: 500,
     messages: [{ role: "user", content: prompt }],
   });

@@ -2,6 +2,11 @@
   "version": 2,
   "cleanUrls": true,
   "buildCommand": "npm run vercel-build",
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",

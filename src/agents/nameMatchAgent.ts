@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { CheckOutput } from "../types/index.js";
+import { CLAUDE_MODEL, TEXT_TIMEOUT_MS } from "../config/constants.js";
 
 export interface DocumentNameEntry {
   docType: string;
@@ -208,12 +209,12 @@ Return STRICT JSON adhering to this structure:
 }`;
 
       const claudePromise = anthropic.messages.create({
-        model: "claude-3-5-sonnet-20241022",
+        model: CLAUDE_MODEL,
         max_tokens: 1024,
         messages: [{ role: "user", content: prompt }],
       });
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Claude name match timeout")), 3500)
+        setTimeout(() => reject(new Error(`Claude name match timed out after ${TEXT_TIMEOUT_MS}ms`)), TEXT_TIMEOUT_MS)
       );
 
       const response = await Promise.race([claudePromise, timeoutPromise]);
@@ -228,7 +229,7 @@ Return STRICT JSON adhering to this structure:
             result: parsed.overallVerdict || "pass",
             detail: parsed.summary,
             evidence: {
-              evaluationMethod: "claude-3-5-sonnet (Semantic Analysis)",
+              evaluationMethod: `${CLAUDE_MODEL} (Semantic Analysis)`,
               comparisons: parsed.comparisons,
               namesExtracted: validNames,
             },
@@ -236,7 +237,7 @@ Return STRICT JSON adhering to this structure:
         }
       }
     } catch (err: any) {
-      console.warn("Claude name matching call failed or timed out, falling back to deterministic semantic matcher:", err.message);
+      console.warn(`[NameMatchAgent] Claude name matching call failed or timed out (${err.message}). Falling back to deterministic semantic matcher.`);
     }
   }
 

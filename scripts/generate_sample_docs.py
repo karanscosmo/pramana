@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-os.makedirs("public/sample_docs", exist_ok=True)
+os.makedirs("public/demo_fixtures", exist_ok=True)
 
 def get_font(size):
     try:
@@ -56,7 +56,7 @@ draw.rectangle([w - 220, 380, w - 50, 450], fill=(245, 250, 255), outline=(140, 
 draw.text((w - 200, 405), "Signature", fill=(120, 140, 160), font=font_sub)
 
 # Save with Adobe Photoshop metadata marker string
-pan_alt_path = "public/sample_docs/pan_card_altered.jpg"
+pan_alt_path = "public/demo_fixtures/pan_card_altered.jpg"
 img_pan_alt.save(pan_alt_path, quality=90, comment="Software: Adobe Photoshop CC 2024 (Macintosh) - Altered Name Layer")
 
 # 2. GENERATE GENUINE PAN CARD
@@ -74,7 +74,7 @@ draw_gen.text((50, 270), "Date of Incorporation", fill=(100, 120, 140), font=fon
 draw_gen.text((50, 295), "15/06/2018", fill=(30, 41, 59), font=font_body)
 draw_gen.rectangle([w - 220, 130, w - 50, 330], fill=(200, 215, 225), outline=(100, 130, 150), width=2)
 draw_gen.text((w - 180, 215), "PHOTO", fill=(100, 130, 150), font=font_bold)
-img_pan_gen.save("public/sample_docs/pan_card_genuine.jpg", quality=95)
+img_pan_gen.save("public/demo_fixtures/pan_card_genuine.jpg", quality=95)
 
 # 3. GENERATE GENUINE GST CERTIFICATE
 w_gst, h_gst = 900, 700
@@ -104,7 +104,7 @@ draw_gst.text((320, 400), "01/07/2018", fill=(15, 23, 42), font=font_body)
 draw_gst.rectangle([w_gst - 220, h_gst - 180, w_gst - 60, h_gst - 60], outline=(11, 102, 77), width=2)
 draw_gst.text((w_gst - 200, h_gst - 130), "OFFICIAL SEAL", fill=(11, 102, 77), font=font_sub)
 
-img_gst.save("public/sample_docs/gst_certificate_genuine.jpg", quality=95)
+img_gst.save("public/demo_fixtures/gst_certificate_genuine.jpg", quality=95)
 
 # 4. GENERATE GENUINE CANCELLED CHEQUE
 w_chk, h_chk = 900, 420
@@ -129,6 +129,6 @@ draw_chk.text((190, 280), "ACME VENTURES PRIVATE LIMITED", fill=(15, 23, 42), fo
 draw_chk.line([100, 110, 450, 320], fill=(220, 38, 38), width=4)
 draw_chk.line([100, 130, 450, 340], fill=(220, 38, 38), width=4)
 
-img_chk.save("public/sample_docs/cancelled_cheque_genuine.jpg", quality=95)
+img_chk.save("public/demo_fixtures/cancelled_cheque_genuine.jpg", quality=95)
 
-print("Sample documents generated successfully in public/sample_docs/")
+print("Sample documents generated successfully in public/demo_fixtures/")

@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import fs from "fs";
 import path from "path";
 import { DocType, TamperOutput } from "../types/index.js";
+import { CLAUDE_MODEL, VISION_TIMEOUT_MS } from "../config/constants.js";
 
 /**
  * Stage 5: Tamper-Consistency Agent
@@ -10,6 +11,7 @@ import { DocType, TamperOutput } from "../types/index.js";
  * 2. Localized compression artifacts or resolution variance (JPEG quantization halos)
  * 3. Misaligned, pasted, or oddly cropped seals/stamps/signatures
  * 4. Irregular kerning or unnatural text baselines indicating post-scan overlay
+ * Analysis is strictly driven by actual document pixels and metadata, never filenames.
  */
 export async function analyzeDocumentTampering(
   filePath: string,
@@ -18,37 +20,20 @@ export async function analyzeDocumentTampering(
   apiKey?: string,
   originalName?: string
 ): Promise<TamperOutput> {
-  const fileName = (originalName || path.basename(filePath)).toLowerCase();
-
-  // Instant local forensic evaluation for sample documents / test files (< 1ms)
-  const isSampleDoc =
-    fileName.includes("gst_certificate") ||
-    fileName.includes("pan_card") ||
-    fileName.includes("cancelled_cheque") ||
-    fileName.includes("cheque_genuine") ||
-    fileName.includes("pan_card_altered") ||
-    fileName.includes("pan_card_genuine") ||
-    fileName.includes("tamper") ||
-    fileName.includes("altered");
-
-  if (isSampleDoc) {
-    return analyzeTamperLocally(filePath, docType, originalName);
-  }
-
-  // If Anthropic API key is provided, execute forensic inspection with Claude Vision (with strict 3500ms timeout)
+  // If Anthropic API key is provided, execute forensic inspection with Claude Vision (with generous 25s timeout)
   if (apiKey && fs.existsSync(filePath)) {
     try {
       const visionPromise = analyzeTamperWithClaudeVision(filePath, docType, mimeType, apiKey);
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Claude Vision tamper timeout")), 3500)
+        setTimeout(() => reject(new Error(`Claude Vision tamper timeout after ${VISION_TIMEOUT_MS}ms`)), VISION_TIMEOUT_MS)
       );
       return await Promise.race([visionPromise, timeoutPromise]);
     } catch (err: any) {
-      console.warn("Claude Vision tamper analysis failed or timed out, falling back to heuristic forensics:", err.message);
+      console.warn(`[TamperAgent] Claude Vision tamper analysis failed or timed out (${err.message}). Falling back to local forensic analysis.`);
     }
   }
 
-  // Local forensic analysis engine
+  // Local forensic analysis engine inspecting actual metadata, headers, and PDF canvas layers
   return analyzeTamperLocally(filePath, docType, originalName);
 }
 
@@ -91,7 +76,7 @@ Respond ONLY in this exact JSON schema:
 }`;
 
   const response = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
+    model: CLAUDE_MODEL,
     max_tokens: 800,
     messages: [
       {
@@ -168,26 +153,7 @@ function analyzeTamperLocally(filePath: string, docType: DocType, originalName?:
       }
     }
 
-    // 2. Check for deliberately modified test markers
-    const isAlteredDemo =
-      fileName.includes("tamper") ||
-      fileName.includes("edited") ||
-      fileName.includes("forged") ||
-      fileName.includes("altered") ||
-      fileName.includes("fake");
-
-    if (isAlteredDemo) {
-      flaggedRegions.push({
-        field: docType === "pan_card" ? "Name on Card" : docType === "gst_certificate" ? "Trade Name" : "Account Holder Name",
-        reason: "Micro-font anti-aliasing anomaly: Field text exhibits sharp 300 DPI vector edges overlaid atop a 150 DPI compressed background raster with mismatched quantization halos.",
-      });
-      flaggedRegions.push({
-        field: "Document Background Raster",
-        reason: "Erasure block detected: Uniform color patch obscures original registration typography with inconsistent noise variance.",
-      });
-    }
-
-    // 3. Evaluate PDF stream anomalies if PDF
+    // 2. Evaluate PDF stream anomalies if PDF
     if (filePath.toLowerCase().endsWith(".pdf")) {
       const formFieldsCount = (rawContent.match(/\/AcroForm/g) || []).length;
       const fontDefs = (rawContent.match(/\/BaseFont/g) || []).length;
@@ -200,7 +166,7 @@ function analyzeTamperLocally(filePath: string, docType: DocType, originalName?:
     }
 
     if (flaggedRegions.length > 0) {
-      const risk = flaggedRegions.length >= 2 || isAlteredDemo ? "high" : "medium";
+      const risk = flaggedRegions.length >= 2 ? "high" : "medium";
       const summary =
         risk === "high"
           ? `High tamper risk detected on ${docType.replace("_", " ").toUpperCase()}: ${flaggedRegions[0].reason}`

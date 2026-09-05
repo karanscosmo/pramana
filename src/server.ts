@@ -17,7 +17,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const JWT_SECRET = process.env.JWT_SECRET || "pramana_merchants_secret_2026";
+
+// Strict JWT_SECRET security enforcement
+if (!process.env.JWT_SECRET) {
+  if (process.env.NODE_ENV === "production") {
+    console.error("[CRITICAL SECURITY ERROR] JWT_SECRET environment variable is missing. Halting startup in production.");
+    process.exit(1);
+  } else {
+    console.warn("[SECURITY WARNING] JWT_SECRET is not set in environment. Use a strong secret in production.");
+  }
+}
+const JWT_SECRET = process.env.JWT_SECRET || "pramana_merchants_secret_2026_dev_only";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -101,7 +111,7 @@ app.use(async (_req: Request, _res: Response, next: () => void) => {
 
 const PUBLIC_DIR = path.resolve(process.cwd(), "public");
 app.use(express.static(PUBLIC_DIR));
-app.use("/uploads", express.static(UPLOADS_DIR));
+// Security: /uploads is intentionally NOT mounted as public static to protect PII (PAN, account numbers, personal data).
 
 /**
  * Root API service directory
@@ -157,7 +167,6 @@ interface MerchantRecord {
   phone: string;
   city: string;
   state: string;
-  plainPassword?: string;
 }
 
 const MERCHANTS_STORE_PATH = path.join("/tmp", "pramana_merchants.json");
@@ -258,11 +267,6 @@ const PRE_SEEDED_ACCOUNTS = [
   },
 ];
 
-/**
- * ============================================================================
- * AUTHENTICATION & USER DASHBOARD ROUTES
- * ============================================================================
- */
 
 /**
  * POST /api/auth/signup — Register new merchant with comprehensive business details
@@ -326,7 +330,6 @@ app.post("/api/auth/signup", async (req: Request, res: Response) => {
       phone: user.phone,
       city: user.city,
       state: user.state,
-      plainPassword: password,
     };
     saveMerchantToStore(merchantRecord);
 
@@ -373,12 +376,9 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
       const cached = GLOBAL_MERCHANTS.get(cleanEmail);
 
       if (cached) {
-        let passwordMatches = false;
-        if (cached.plainPassword && cached.plainPassword === password) {
-          passwordMatches = true;
-        } else if (cached.passwordHash) {
-          passwordMatches = await bcrypt.compare(password, cached.passwordHash).catch(() => false);
-        }
+        const passwordMatches = cached.passwordHash
+          ? await bcrypt.compare(password, cached.passwordHash).catch(() => false)
+          : false;
 
         if (passwordMatches) {
           user = await prisma.user.upsert({
@@ -429,7 +429,6 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
             phone: user.phone,
             city: user.city,
             state: user.state,
-            plainPassword: password,
           });
         }
       }
@@ -463,7 +462,6 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
             phone: user.phone,
             city: user.city,
             state: user.state,
-            plainPassword: password,
           });
         }
       }
@@ -798,6 +796,39 @@ app.post("/api/session/:id/document", upload.single("document"), async (req: Req
       payload: { message: error.message },
     });
     res.status(500).json({ error: "Document processing failed", message: error.message });
+  }
+});
+
+/**
+ * GET /api/session/:id/document/:docId/file — Authenticated secure access to uploaded document
+ */
+app.get("/api/session/:id/document/:docId/file", optionalAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id, docId } = req.params;
+    const session = await prisma.verificationSession.findUnique({
+      where: { id },
+      include: { documents: true },
+    });
+
+    if (!session) {
+      res.status(404).json({ error: "Session not found" });
+      return;
+    }
+
+    if (session.userId && (!req.user || req.user.userId !== session.userId)) {
+      res.status(403).json({ error: "Forbidden: You do not have permission to view this document." });
+      return;
+    }
+
+    const doc = session.documents.find((d) => d.id === docId);
+    if (!doc || !doc.rawFileUrl || !fs.existsSync(doc.rawFileUrl)) {
+      res.status(404).json({ error: "Document file not found on disk" });
+      return;
+    }
+
+    res.sendFile(path.resolve(doc.rawFileUrl));
+  } catch (err: any) {
+    res.status(500).json({ error: "Failed to access document file", message: err.message });
   }
 });
 

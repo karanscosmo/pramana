@@ -124,6 +124,22 @@ class VerificationOrchestrator {
     });
 
     const isTamperFail = tamperResult.tamperRisk === "high" || tamperResult.tamperRisk === "medium";
+    
+    // Deduplicate: replace any prior tamper check for this docType in this session
+    const priorTamper = await prisma.verificationCheck.findMany({
+      where: { sessionId, checkType: "tamper_consistency" },
+    });
+    for (const pt of priorTamper) {
+      try {
+        const ev = JSON.parse(pt.evidence);
+        if (ev && ev.docType === docType) {
+          await prisma.verificationCheck.delete({ where: { id: pt.id } });
+        }
+      } catch {
+        // non-fatal
+      }
+    }
+
     const tamperCheckRecord = await prisma.verificationCheck.create({
       data: {
         sessionId,
@@ -253,7 +269,15 @@ class VerificationOrchestrator {
 
       executedChecks.push(checkResult);
 
-      // Upsert or record check
+      // Deduplicate: remove any prior record for this checkType in this session to prevent accumulation
+      await prisma.verificationCheck.deleteMany({
+        where: {
+          sessionId,
+          checkType: checkResult.checkType,
+        },
+      });
+
+      // Record latest definitive check
       const checkRecord = await prisma.verificationCheck.create({
         data: {
           sessionId,
@@ -402,6 +426,22 @@ class VerificationOrchestrator {
       });
 
       const isTamperFail = tamperResult.tamperRisk === "high" || tamperResult.tamperRisk === "medium";
+      
+      // Deduplicate prior tamper check for this docType
+      const priorDemoTamper = await prisma.verificationCheck.findMany({
+        where: { sessionId, checkType: "tamper_consistency" },
+      });
+      for (const pt of priorDemoTamper) {
+        try {
+          const ev = JSON.parse(pt.evidence);
+          if (ev && ev.docType === doc.docType) {
+            await prisma.verificationCheck.delete({ where: { id: pt.id } });
+          }
+        } catch {
+          // non-fatal
+        }
+      }
+
       await prisma.verificationCheck.create({
         data: {
           sessionId,

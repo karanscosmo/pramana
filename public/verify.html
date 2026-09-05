@@ -1293,19 +1293,19 @@
 
     // Load Demo Test Documents
     btnLoadTampered.addEventListener("click", async () => {
-      logTelemetry("[DEMO] Loading test files with altered PAN Card (Photoshop overlay)...", true);
-      await loadTestFile("/sample_docs/pan_card_altered.jpg", "pan_card_altered.jpg", "pan_card", "thumb-pan", "name-pan", "size-pan", "drop-pan-empty", "drop-pan-loaded", dropPan);
-      await loadTestFile("/sample_docs/gst_certificate_genuine.jpg", "gst_certificate_genuine.jpg", "gst_certificate", "thumb-gst", "name-gst", "size-gst", "drop-gst-empty", "drop-gst-loaded", dropGst);
-      await loadTestFile("/sample_docs/cancelled_cheque_genuine.jpg", "cancelled_cheque_genuine.jpg", "cancelled_cheque", "thumb-cheque", "name-cheque", "size-cheque", "drop-cheque-empty", "drop-cheque-loaded", dropCheque);
-      logTelemetry("[DEMO] Altered test suite loaded. Click 'Run 6-Stage Verification Pipeline' to inspect!", true);
+      logTelemetry("[DEMO] Loading curated test fixtures with altered PAN Card...", true);
+      await loadTestFile("/demo_fixtures/pan_card_altered.jpg", "pan_card_altered.jpg", "pan_card", "thumb-pan", "name-pan", "size-pan", "drop-pan-empty", "drop-pan-loaded", dropPan);
+      await loadTestFile("/demo_fixtures/gst_certificate_genuine.jpg", "gst_certificate_genuine.jpg", "gst_certificate", "thumb-gst", "name-gst", "size-gst", "drop-gst-empty", "drop-gst-loaded", dropGst);
+      await loadTestFile("/demo_fixtures/cancelled_cheque_genuine.jpg", "cancelled_cheque_genuine.jpg", "cancelled_cheque", "thumb-cheque", "name-cheque", "size-cheque", "drop-cheque-empty", "drop-cheque-loaded", dropCheque);
+      logTelemetry("[DEMO] Curated test fixtures loaded. Click 'Run 6-Stage Verification Pipeline' to inspect!", true);
     });
 
     btnLoadClean.addEventListener("click", async () => {
-      logTelemetry("[DEMO] Loading genuine test documents...", true);
-      await loadTestFile("/sample_docs/pan_card_genuine.jpg", "pan_card_genuine.jpg", "pan_card", "thumb-pan", "name-pan", "size-pan", "drop-pan-empty", "drop-pan-loaded", dropPan);
-      await loadTestFile("/sample_docs/gst_certificate_genuine.jpg", "gst_certificate_genuine.jpg", "gst_certificate", "thumb-gst", "name-gst", "size-gst", "drop-gst-empty", "drop-gst-loaded", dropGst);
-      await loadTestFile("/sample_docs/cancelled_cheque_genuine.jpg", "cancelled_cheque_genuine.jpg", "cancelled_cheque", "thumb-cheque", "name-cheque", "size-cheque", "drop-cheque-empty", "drop-cheque-loaded", dropCheque);
-      logTelemetry("[DEMO] Genuine test suite loaded. Click 'Run 6-Stage Verification Pipeline' to inspect!", true);
+      logTelemetry("[DEMO] Loading curated genuine test fixtures...", true);
+      await loadTestFile("/demo_fixtures/pan_card_genuine.jpg", "pan_card_genuine.jpg", "pan_card", "thumb-pan", "name-pan", "size-pan", "drop-pan-empty", "drop-pan-loaded", dropPan);
+      await loadTestFile("/demo_fixtures/gst_certificate_genuine.jpg", "gst_certificate_genuine.jpg", "gst_certificate", "thumb-gst", "name-gst", "size-gst", "drop-gst-empty", "drop-gst-loaded", dropGst);
+      await loadTestFile("/demo_fixtures/cancelled_cheque_genuine.jpg", "cancelled_cheque_genuine.jpg", "cancelled_cheque", "thumb-cheque", "name-cheque", "size-cheque", "drop-cheque-empty", "drop-cheque-loaded", dropCheque);
+      logTelemetry("[DEMO] Curated genuine test fixtures loaded. Click 'Run 6-Stage Verification Pipeline' to inspect!", true);
     });
 
     async function loadTestFile(url, fileName, key, thumbId, nameId, sizeId, emptyId, loadedId, dropEl) {

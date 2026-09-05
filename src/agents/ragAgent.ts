@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { CLAUDE_MODEL, TEXT_TIMEOUT_MS } from "../config/constants.js";
 
 export interface DocumentChunk {
   id: string;
@@ -220,11 +221,16 @@ ${query}
 
 Response:`;
 
-      const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20241022",
+      const claudePromise = anthropic.messages.create({
+        model: CLAUDE_MODEL,
         max_tokens: 350,
         messages: [{ role: "user", content: prompt }],
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Claude RAG timed out after ${TEXT_TIMEOUT_MS}ms`)), TEXT_TIMEOUT_MS)
+      );
+
+      const response = await Promise.race([claudePromise, timeoutPromise]);
 
       const textBlock = response.content.find((b) => b.type === "text");
       const answer = textBlock ? (textBlock as any).text.trim() : "Unable to formulate answer from documents.";
@@ -235,7 +241,7 @@ Response:`;
         confidence: 0.95,
       };
     } catch (err: any) {
-      console.warn("Claude RAG generation fallback:", err.message);
+      console.warn(`[RagAgent] Claude RAG generation fallback (${err.message}). Using deterministic synthesizer.`);
     }
   }
 
