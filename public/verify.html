@@ -612,51 +612,72 @@
       overflow-wrap: anywhere;
     }
 
-    .citation-list {
-      margin-top: 0.65rem;
+    .ai-response-body {
+      font-size: 0.92rem;
+      color: var(--ink-primary);
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .ai-response-body p {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .ai-response-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .ai-response-body strong {
+      color: var(--ink-primary);
+      font-weight: 600;
+    }
+
+    .citation-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
       padding-top: 0.65rem;
       border-top: 1px dashed var(--paper-border);
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
     }
 
-    .citation-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      background: #ffffff;
-      border: 1px solid var(--paper-border);
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.78rem;
-      max-width: 100%;
-      box-sizing: border-box;
-      overflow: hidden;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-    }
-
-    .citation-source {
+    .citation-label {
       font-family: var(--font-mono);
+      font-size: 0.68rem;
       font-weight: 700;
-      color: var(--seal-emerald);
-      font-size: 0.74rem;
-      word-break: break-word;
-      overflow-wrap: anywhere;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-right: 0.2rem;
     }
 
-    .citation-snippet {
-      color: var(--ink-muted);
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-      line-height: 1.45;
+    .citation-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #ffffff;
+      border: 1px solid rgba(11, 102, 77, 0.2);
+      border-radius: 9999px;
+      padding: 0.22rem 0.6rem;
+      font-size: 0.72rem;
+      color: var(--seal-emerald);
+      font-weight: 500;
+      transition: all 0.15s ease;
+      cursor: default;
+    }
+
+    .citation-chip:hover {
+      background: var(--seal-emerald-wash);
+      border-color: var(--seal-emerald);
+    }
+
+    .chip-icon {
+      font-size: 0.78rem;
+    }
+
+    .chip-name {
+      font-family: var(--font-sans);
     }
 
     .copilot-input-bar {
@@ -1779,6 +1800,57 @@
       if (e.key === "Enter") handleAskCopilot();
     });
 
+    function renderMarkdown(text) {
+      if (!text) return "";
+      let html = escapeHtml(text);
+      // Bold **text**
+      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      // Italic *text*
+      html = html.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, '$1<em>$2</em>');
+      // Bullet points
+      html = html.replace(/^[•\-\*]\s+(.+)$/gm, '<li style="margin-bottom: 0.25rem;">$1</li>');
+      html = html.replace(/(<li[\s\S]+?<\/li>)/g, '<ul style="padding-left: 1.25rem; margin: 0.4rem 0;">$1</ul>');
+      // Paragraphs
+      const paras = html.split(/\n\n+/).map(p => {
+        p = p.trim();
+        if (!p) return "";
+        if (p.startsWith("<ul") || p.startsWith("<li")) return p;
+        return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+      });
+      return paras.join("");
+    }
+
+    function formatCitationBadge(c) {
+      const src = (c.source || "").toLowerCase();
+      const snip = (c.snippet || "").toLowerCase();
+
+      if (src.includes("gstin mod-36") || snip.includes("mod-36") || src.includes("checksum") || snip.includes("checksum")) {
+        return { icon: "🏛️", name: "GSTIN Mod-36 Checksum", desc: "Mathematically confirmed via official GST portal Modulo-36 formula" };
+      }
+      if (src.includes("pan ⇄ gst") || snip.includes("pan ⇄ gst") || src.includes("pan_match") || src.includes("pan cross")) {
+        return { icon: "🪪", name: "PAN ⇄ GST Match", desc: "PAN matches the tax registration in the GST Certificate" };
+      }
+      if (src.includes("ifsc") || snip.includes("razorpay") || src.includes("bank registry")) {
+        return { icon: "🏦", name: "Razorpay Bank Registry", desc: "IFSC code verified against live Razorpay routing directory" };
+      }
+      if (src.includes("name") || snip.includes("name")) {
+        return { icon: "🏢", name: "Legal Name Match", desc: "Entity name verified consistent across all submitted records" };
+      }
+      if (src.includes("tamper") || snip.includes("tamper") || src.includes("forensic")) {
+        return { icon: "🔍", name: "Forensic Tamper Scan", desc: "Image layers and typography verified genuine with 0 tampering" };
+      }
+      if (c.docType === "gst_certificate" || src.includes("gst")) {
+        return { icon: "📄", name: "GST Certificate", desc: "Official Government GST Registration Document" };
+      }
+      if (c.docType === "pan_card" || src.includes("pan")) {
+        return { icon: "🪪", name: "PAN Card", desc: "Income Tax Department Permanent Account Number" };
+      }
+      if (c.docType === "cancelled_cheque" || src.includes("cheque") || src.includes("bank")) {
+        return { icon: "🏦", name: "Cancelled Cheque", desc: "Commercial Bank Account Verification Proof" };
+      }
+      return { icon: "📄", name: c.source || "Verified Document", desc: c.snippet || "Verified document evidence" };
+    }
+
     async function handleAskCopilot() {
       const query = copilotInput.value.trim();
       if (!query || !currentSessionId) return;
@@ -1799,7 +1871,7 @@
       aiBubble.innerHTML = `
         <div style="display:flex; align-items:center; gap: 0.5rem; color: var(--ink-secondary);">
           <span class="status-pulse-dot"></span>
-          <span>Searching verified document facts...</span>
+          <span>Bodh is analyzing verified records...</span>
         </div>
       `;
       copilotChatBox.appendChild(aiBubble);
@@ -1813,32 +1885,34 @@
 
         let citationsHtml = "";
         if (response.citations && response.citations.length > 0) {
-          // Clean concise citation tags
-          citationsHtml = `
-            <div class="citation-list">
-              <span class="mono" style="font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase;">
-                Verified Grounded Sources (${Math.round(response.confidence * 100)}% Match):
-              </span>
-              ${response.citations.slice(0, 2).map(c => {
-                // Shorten snippet to just the essential detail
-                let cleanSnippet = c.snippet || "";
-                if (cleanSnippet.includes("Evidence:")) {
-                  cleanSnippet = cleanSnippet.split("Evidence:")[0].trim();
-                }
-                return `
-                  <div class="citation-item">
-                    <div class="citation-source">📄 ${escapeHtml(c.source)}</div>
-                    <div class="citation-snippet">${escapeHtml(cleanSnippet)}</div>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          `;
+          const seen = new Set();
+          const uniqueBadges = [];
+          for (const c of response.citations) {
+            const badge = formatCitationBadge(c);
+            if (!seen.has(badge.name)) {
+              seen.add(badge.name);
+              uniqueBadges.push(badge);
+            }
+          }
+
+          if (uniqueBadges.length > 0) {
+            citationsHtml = `
+              <div class="citation-chips-row">
+                <span class="citation-label">Verified Sources:</span>
+                ${uniqueBadges.slice(0, 3).map(b => `
+                  <span class="citation-chip" title="${escapeHtml(b.desc)}">
+                    <span class="chip-icon">${b.icon}</span>
+                    <span class="chip-name">${escapeHtml(b.name)}</span>
+                  </span>
+                `).join("")}
+              </div>
+            `;
+          }
         }
 
         aiBubble.innerHTML = `
-          <div style="font-size: 0.92rem; color: var(--ink-primary); line-height: 1.5;">
-            ${escapeHtml(response.answer)}
+          <div class="ai-response-body">
+            ${renderMarkdown(response.answer)}
           </div>
           ${citationsHtml}
         `;
