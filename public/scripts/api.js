@@ -1,6 +1,6 @@
 export const API = {
   getToken() {
-    return localStorage.getItem('pramana_token') || localStorage.getItem('nirnay_token');
+    return localStorage.getItem('pramana_token');
   },
 
   getAuthHeaders() {

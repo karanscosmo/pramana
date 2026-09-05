@@ -650,8 +650,6 @@
         // Store JWT token and user info
         localStorage.setItem('pramana_token', data.token);
         localStorage.setItem('pramana_user', JSON.stringify(data.user));
-        localStorage.setItem('nirnay_token', data.token);
-        localStorage.setItem('nirnay_user', JSON.stringify(data.user));
 
         // Cache account credentials for instant serverless re-hydration on login
         try {
@@ -662,7 +660,6 @@
           };
           localStorage.setItem('pramana_accounts', JSON.stringify(savedAccounts));
           localStorage.setItem('pramana_last_email', payload.email);
-          localStorage.setItem('nirnay_last_email', payload.email);
         } catch (e) {
           // Non-fatal
         }

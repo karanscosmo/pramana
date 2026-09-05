@@ -44,8 +44,8 @@
   <script>
     // Check if merchant is logged in
     (function checkAuth() {
-      const token = localStorage.getItem('pramana_token') || localStorage.getItem('nirnay_token');
-      const userStr = localStorage.getItem('pramana_user') || localStorage.getItem('nirnay_user');
+      const token = localStorage.getItem('pramana_token');
+      const userStr = localStorage.getItem('pramana_user');
       if (token && userStr) {
         try {
           const user = JSON.parse(userStr);

@@ -237,16 +237,6 @@ const PRE_SEEDED_ACCOUNTS = [
     state: "Maharashtra",
   },
   {
-    email: "demo@nirnay.ai",
-    passwords: ["pramana2026", "demo123", "password", "123456"],
-    fullName: "Aravind Sharma",
-    businessName: "Acme Infotech Private Limited",
-    businessType: "private_limited",
-    phone: "9820012345",
-    city: "Mumbai",
-    state: "Maharashtra",
-  },
-  {
     email: "merchant@acme.in",
     passwords: ["pramana2026", "password", "acme123", "123456"],
     fullName: "Aravind Sharma",
@@ -258,16 +248,6 @@ const PRE_SEEDED_ACCOUNTS = [
   },
   {
     email: "admin@pramana.ai",
-    passwords: ["pramana2026", "admin123", "123456"],
-    fullName: "Lead Underwriter",
-    businessName: "Pramana Risk Intelligence",
-    businessType: "private_limited",
-    phone: "9820000000",
-    city: "Bengaluru",
-    state: "Karnataka",
-  },
-  {
-    email: "admin@nirnay.ai",
     passwords: ["pramana2026", "admin123", "123456"],
     fullName: "Lead Underwriter",
     businessName: "Pramana Risk Intelligence",

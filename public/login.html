@@ -420,10 +420,6 @@
         localStorage.setItem('pramana_token', data.token);
         localStorage.setItem('pramana_user', JSON.stringify(data.user));
         localStorage.setItem('pramana_last_email', email);
-        // Compatibility keys
-        localStorage.setItem('nirnay_token', data.token);
-        localStorage.setItem('nirnay_user', JSON.stringify(data.user));
-        localStorage.setItem('nirnay_last_email', email);
 
         showAlert('Signed in successfully! Redirecting to dashboard...', 'success');
         setTimeout(() => {

@@ -826,7 +826,7 @@
 
   <script>
     (function checkVerifyAuth() {
-      const token = localStorage.getItem('pramana_token') || localStorage.getItem('nirnay_token');
+      const token = localStorage.getItem('pramana_token');
       if (token) {
         const dashBtn = document.getElementById('verify-nav-dash');
         const loginBtn = document.getElementById('verify-nav-login');

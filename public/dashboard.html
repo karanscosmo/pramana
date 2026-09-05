@@ -575,7 +575,7 @@
   <script type="module">
     import { formatCertificateHTML, downloadCertificateDocx } from "/scripts/certificate.js";
 
-    const token = localStorage.getItem('pramana_token') || localStorage.getItem('nirnay_token');
+    const token = localStorage.getItem('pramana_token');
     if (!token) {
       window.location.href = '/login.html';
     }
@@ -584,8 +584,6 @@
     document.getElementById('nav-logout-btn').addEventListener('click', () => {
       localStorage.removeItem('pramana_token');
       localStorage.removeItem('pramana_user');
-      localStorage.removeItem('nirnay_token');
-      localStorage.removeItem('nirnay_user');
       window.location.href = '/login.html';
     });
 
@@ -611,7 +609,6 @@
 
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('pramana_token');
-          localStorage.removeItem('nirnay_token');
           window.location.href = '/login.html';
           return;
         }
