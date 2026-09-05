@@ -600,6 +600,9 @@
       <a href="/dashboard.html" class="nav-btn nav-btn-secondary">
         <span>Merchant Dashboard</span>
       </a>
+      <button id="bodh-nav-logout" class="nav-btn nav-btn-secondary" style="display: none; border-color: rgba(220, 38, 38, 0.4); color: #dc2626;">
+        <span>Log Out</span>
+      </button>
       <span class="rag-status-badge" id="nav-session-badge">
         <span class="status-pulse-dot"></span>
         <span id="session-badge-label">Live Session</span>
@@ -762,6 +765,21 @@
       const metaIfsc = document.getElementById("meta-ifsc");
       const metaBank = document.getElementById("meta-bank-name");
       const sessionBadgeLabel = document.getElementById("session-badge-label");
+
+      // Auth & Logout
+      const navLogoutBtn = document.getElementById("bodh-nav-logout");
+      if (sessionStorage.getItem("pramana_token")) {
+        if (navLogoutBtn) {
+          navLogoutBtn.style.display = "inline-flex";
+          navLogoutBtn.addEventListener("click", () => {
+            sessionStorage.removeItem("pramana_token");
+            sessionStorage.removeItem("pramana_user");
+            localStorage.removeItem("pramana_token");
+            localStorage.removeItem("pramana_user");
+            window.location.href = "/login.html";
+          });
+        }
+      }
 
       const chatStream = document.getElementById("chat-stream");
       const bodhForm = document.getElementById("bodh-query-form");

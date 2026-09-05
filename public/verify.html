@@ -814,6 +814,9 @@
       <a href="/dashboard.html" id="verify-nav-dash" class="back-home-link" style="display: none; border-color: rgba(52, 211, 153, 0.4); color: #34d399;">
         <span>My Dashboard</span>
       </a>
+      <button id="verify-nav-logout" class="back-home-link" style="display: none; background: transparent; border: 1px solid rgba(220, 38, 38, 0.4); color: #dc2626; cursor: pointer;">
+        <span>Log Out</span>
+      </button>
       <a href="/login.html" id="verify-nav-login" class="back-home-link">
         <span>Sign In</span>
       </a>
@@ -832,11 +835,22 @@
 
   <script>
     (function checkVerifyAuth() {
-      const token = localStorage.getItem('pramana_token');
+      const token = sessionStorage.getItem('pramana_token');
+      const dashBtn = document.getElementById('verify-nav-dash');
+      const logoutBtn = document.getElementById('verify-nav-logout');
+      const loginBtn = document.getElementById('verify-nav-login');
       if (token) {
-        const dashBtn = document.getElementById('verify-nav-dash');
-        const loginBtn = document.getElementById('verify-nav-login');
         if (dashBtn) dashBtn.style.display = 'inline-flex';
+        if (logoutBtn) {
+          logoutBtn.style.display = 'inline-flex';
+          logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('pramana_token');
+            sessionStorage.removeItem('pramana_user');
+            localStorage.removeItem('pramana_token');
+            localStorage.removeItem('pramana_user');
+            window.location.href = '/login.html';
+          });
+        }
         if (loginBtn) loginBtn.style.display = 'none';
       }
     })();

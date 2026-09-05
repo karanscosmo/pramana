@@ -45,8 +45,8 @@
   <script>
     // Check if merchant is logged in
     (function checkAuth() {
-      const token = localStorage.getItem('pramana_token');
-      const userStr = localStorage.getItem('pramana_user');
+      const token = sessionStorage.getItem('pramana_token');
+      const userStr = sessionStorage.getItem('pramana_user');
       if (token && userStr) {
         try {
           const user = JSON.parse(userStr);
@@ -58,7 +58,15 @@
                 Dashboard (${user.fullName.split(' ')[0]})
               </a>
               <a href="/verify.html" class="header-cta-btn">Open Verification Studio</a>
+              <button id="index-logout-btn" class="header-nav-link" style="background:transparent; border:1px solid rgba(220,38,38,0.4); color:#dc2626; padding: 0.35rem 0.75rem; border-radius: 6px; cursor:pointer; font-weight:600;">Log Out</button>
             `;
+            document.getElementById('index-logout-btn')?.addEventListener('click', () => {
+              sessionStorage.removeItem('pramana_token');
+              sessionStorage.removeItem('pramana_user');
+              localStorage.removeItem('pramana_token');
+              localStorage.removeItem('pramana_user');
+              window.location.href = '/login.html';
+            });
           }
         } catch (e) {}
       }

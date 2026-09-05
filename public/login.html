@@ -417,8 +417,10 @@
           throw new Error(data.error || 'Invalid credentials');
         }
 
-        localStorage.setItem('pramana_token', data.token);
-        localStorage.setItem('pramana_user', JSON.stringify(data.user));
+        sessionStorage.setItem('pramana_token', data.token);
+        sessionStorage.setItem('pramana_user', JSON.stringify(data.user));
+        localStorage.removeItem('pramana_token');
+        localStorage.removeItem('pramana_user');
         localStorage.setItem('pramana_last_email', email);
 
         showAlert('Signed in successfully! Redirecting to dashboard...', 'success');

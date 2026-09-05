@@ -576,13 +576,15 @@
   <script type="module">
     import { formatCertificateHTML, downloadCertificateDocx } from "/scripts/certificate.js";
 
-    const token = localStorage.getItem('pramana_token');
+    const token = sessionStorage.getItem('pramana_token');
     if (!token) {
       window.location.href = '/login.html';
     }
 
     // Logout
     document.getElementById('nav-logout-btn').addEventListener('click', () => {
+      sessionStorage.removeItem('pramana_token');
+      sessionStorage.removeItem('pramana_user');
       localStorage.removeItem('pramana_token');
       localStorage.removeItem('pramana_user');
       window.location.href = '/login.html';
@@ -609,7 +611,8 @@
         });
 
         if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem('pramana_token');
+          sessionStorage.removeItem('pramana_token');
+          sessionStorage.removeItem('pramana_user');
           window.location.href = '/login.html';
           return;
         }

@@ -647,9 +647,11 @@
           throw new Error(data.error || 'Failed to create account');
         }
 
-        // Store JWT token and user info
-        localStorage.setItem('pramana_token', data.token);
-        localStorage.setItem('pramana_user', JSON.stringify(data.user));
+        // Store JWT token and user info in session
+        sessionStorage.setItem('pramana_token', data.token);
+        sessionStorage.setItem('pramana_user', JSON.stringify(data.user));
+        localStorage.removeItem('pramana_token');
+        localStorage.removeItem('pramana_user');
 
         // Cache account credentials for instant serverless re-hydration on login
         try {

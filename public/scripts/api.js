@@ -1,6 +1,14 @@
 export const API = {
   getToken() {
-    return localStorage.getItem('pramana_token');
+    return sessionStorage.getItem('pramana_token');
+  },
+
+  logout() {
+    sessionStorage.removeItem('pramana_token');
+    sessionStorage.removeItem('pramana_user');
+    localStorage.removeItem('pramana_token');
+    localStorage.removeItem('pramana_user');
+    window.location.href = '/login.html';
   },
 
   getAuthHeaders() {
