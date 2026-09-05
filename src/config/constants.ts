@@ -3,7 +3,7 @@
  */
 
 // Active Anthropic model ID for vision and text analysis
-export const CLAUDE_MODEL = "claude-3-5-sonnet-20241022";
+export const CLAUDE_MODEL = "claude-sonnet-4-6";
 
 // Detect if running inside Vercel Serverless environment
 const IS_VERCEL = Boolean(process.env.VERCEL);

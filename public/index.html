@@ -7,6 +7,7 @@
   <meta name="description" content="Pramana reads a business's onboarding documents — GST certificate, PAN card, cancelled cheque — extracts every key field, and cross-verifies them deterministically and against live public registries.">
   
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles/demo-player.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230b664d'/><path d='M30 50 L44 64 L70 36' fill='none' stroke='%23ffffff' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 </head>
 <body>
@@ -35,6 +36,10 @@
     </div>
 
     <div style="display: flex; align-items: center; gap: 0.65rem;" id="header-auth-actions">
+      <button class="hero-watch-demo-btn btn-trigger-watch-demo" id="nav-watch-demo-btn" style="padding: 0.45rem 1rem; font-size: 0.84rem;">
+        <span class="play-icon-bubble" style="width: 20px; height: 20px; font-size: 9px;">▶</span>
+        <span>Watch Demo</span>
+      </button>
       <a href="/login.html" id="nav-login-link" class="header-nav-link">Sign In</a>
       <a href="/signup.html" id="nav-signup-link" class="header-signup-btn">Create Account</a>
       <a href="/verify.html" class="header-cta-btn">Open Verification Studio</a>
@@ -52,6 +57,10 @@
           const container = document.getElementById('header-auth-actions');
           if (container) {
             container.innerHTML = `
+              <button class="hero-watch-demo-btn btn-trigger-watch-demo" style="padding: 0.45rem 1rem; font-size: 0.84rem;">
+                <span class="play-icon-bubble" style="width: 20px; height: 20px; font-size: 9px;">▶</span>
+                <span>Watch Demo</span>
+              </button>
               <a href="/bodh.html" class="header-cta-btn" style="background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.4); color: #ffffff; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: #34d399;">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -130,6 +139,13 @@
 
         <!-- BEAT 1: The Stack / Implied Problem -->
         <article class="narrative-beat active" data-beat="0">
+          <div style="margin-bottom: 1.25rem;">
+            <button class="hero-watch-demo-btn btn-trigger-watch-demo" id="btn-hero-watch-demo" style="font-size: 1.05rem; padding: 0.75rem 1.6rem;">
+              <span class="play-icon-bubble" style="width: 28px; height: 28px; font-size: 13px;">▶</span>
+              <span>Watch Demo</span>
+              <span class="time-hint">(Auto-Playing 3 Min)</span>
+            </button>
+          </div>
           <div class="beat-kicker">MANUAL CHECKING PROBLEM</div>
           <h1 class="beat-headline">
             Three documents.<br>
@@ -600,5 +616,6 @@
   </div>
 
   <script src="script.js"></script>
+  <script type="module" src="/scripts/demo-player.js"></script>
 </body>
 </html>

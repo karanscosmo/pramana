@@ -18,16 +18,19 @@ export async function extractDocumentFields(
   apiKey?: string,
   originalName?: string
 ): Promise<ExtractionOutput> {
-  // If Anthropic API key is provided and file exists, invoke Claude Vision with generous 25s timeout
+  // If Anthropic API key is provided and file exists, invoke Claude Vision with generous timeout
   if (apiKey && fs.existsSync(filePath)) {
     try {
+      console.log(`[ExtractionAgent] Running Claude Vision extraction (${CLAUDE_MODEL}) on ${path.basename(filePath)}...`);
       const visionPromise = extractWithClaudeVision(filePath, docTypeHint, mimeType, apiKey);
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error(`Claude Vision extraction timed out after ${VISION_TIMEOUT_MS}ms`)), VISION_TIMEOUT_MS)
       );
-      return await Promise.race([visionPromise, timeoutPromise]);
+      const res = await Promise.race([visionPromise, timeoutPromise]);
+      console.log(`[ExtractionAgent] Claude Vision extraction (${CLAUDE_MODEL}) SUCCEEDED on ${path.basename(filePath)}:`, JSON.stringify(res.fields));
+      return res;
     } catch (err: any) {
-      console.warn(`[ExtractionAgent] Claude Vision extraction failed or timed out (${err.message}). Falling back to genuine Tesseract OCR.`);
+      console.warn(`[ExtractionAgent] Claude Vision (${CLAUDE_MODEL}) failed or credit exhausted (${err.message}). Falling back to genuine Tesseract OCR.`);
     }
   }
 
