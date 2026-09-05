@@ -200,53 +200,58 @@ class VerificationOrchestrator {
     let panDoc = parsedDocs.find((d) => d.docType === "pan_card");
     let chequeDoc = parsedDocs.find((d) => d.docType === "cancelled_cheque" || d.docType === "bank_proof");
 
+    const panNumber = panDoc ? (panDoc.parsedFields.panNumber || panDoc.parsedFields.pan) : null;
+    const gstin = gstDoc ? gstDoc.parsedFields.gstin : null;
+    const ifsc = chequeDoc ? chequeDoc.parsedFields.ifsc : null;
+
     const checksToRun: Array<() => Promise<CheckOutput | null>> = [];
 
     // Check 1: PAN format check (runs if PAN card is present)
-    if (panDoc && panDoc.parsedFields.panNumber) {
+    if (panDoc && panNumber) {
       checksToRun.push(async () => {
-        return validatePanFormat(panDoc!.parsedFields.panNumber);
+        return validatePanFormat(panNumber);
       });
     }
 
     // Check 2: GSTIN checksum validation (runs if GST certificate is present)
-    if (gstDoc && gstDoc.parsedFields.gstin) {
+    if (gstDoc && gstin) {
       checksToRun.push(async () => {
-        return validateGstinChecksum(gstDoc!.parsedFields.gstin);
+        return validateGstinChecksum(gstin);
       });
     }
 
     // Check 3: GSTIN ⇄ PAN structural match (runs if both GST & PAN are present)
-    if (gstDoc && panDoc && gstDoc.parsedFields.gstin && panDoc.parsedFields.panNumber) {
+    if (gstDoc && panDoc && gstin && panNumber) {
       checksToRun.push(async () => {
-        return validateGstinPanMatch(gstDoc!.parsedFields.gstin, panDoc!.parsedFields.panNumber);
+        return validateGstinPanMatch(gstin, panNumber);
       });
     }
 
     // Check 4: External live IFSC verification via Razorpay public registry (runs if cheque is present)
-    if (chequeDoc && chequeDoc.parsedFields.ifsc) {
+    if (chequeDoc && ifsc) {
       checksToRun.push(async () => {
-        return verifyIfscCode(chequeDoc!.parsedFields.ifsc, chequeDoc!.parsedFields.bankName);
+        return verifyIfscCode(ifsc, chequeDoc.parsedFields.bankName);
       });
     }
 
     // Check 5: Cross-document semantic name matching (runs if at least 2 documents with entity names exist)
     const nameEntries: DocumentNameEntry[] = [];
-    if (gstDoc && gstDoc.parsedFields.legalBusinessName) {
+    if (gstDoc && gstDoc.parsedFields.legalBusinessName && gstDoc.parsedFields.legalBusinessName !== "Not Detected") {
       nameEntries.push({
         docType: "GST Certificate",
         sourceField: "legalBusinessName",
         name: gstDoc.parsedFields.legalBusinessName,
       });
     }
-    if (panDoc && (panDoc.parsedFields.name || panDoc.parsedFields.businessName)) {
+    const panName = panDoc?.parsedFields?.name || panDoc?.parsedFields?.businessName;
+    if (panDoc && panName && panName !== "Not Detected") {
       nameEntries.push({
         docType: "PAN Card",
         sourceField: "name",
-        name: panDoc.parsedFields.name || panDoc.parsedFields.businessName,
+        name: panName,
       });
     }
-    if (chequeDoc && chequeDoc.parsedFields.accountHolderName) {
+    if (chequeDoc && chequeDoc.parsedFields.accountHolderName && chequeDoc.parsedFields.accountHolderName !== "Not Detected") {
       nameEntries.push({
         docType: "Cancelled Cheque",
         sourceField: "accountHolderName",
@@ -257,6 +262,15 @@ class VerificationOrchestrator {
     if (nameEntries.length >= 2) {
       checksToRun.push(async () => {
         return matchNamesAcrossDocuments(nameEntries, apiKey);
+      });
+    } else if (docs.length >= 2) {
+      checksToRun.push(async () => {
+        return {
+          checkType: "name_cross_match",
+          result: "fail",
+          detail: "Entity legal names could not be cleanly resolved across 2 or more submitted documents for fuzzy cross-matching.",
+          evidence: { detectedNames: nameEntries.length, totalUploaded: docs.length },
+        };
       });
     }
 

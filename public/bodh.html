@@ -871,23 +871,26 @@
       function renderApplicantBanner(report) {
         if (!report) return;
 
-        // Find primary fields
-        let legalName = "Acme Infotech Private Limited";
-        let gstin = "27AAPFU0939F1ZV";
-        let pan = "AAPFU0939F";
-        let ifsc = "HDFC0000060";
-        let bank = "HDFC Bank";
+        const isSample = report.sessionId === "sample-preview";
+        let legalName = isSample ? "Acme Infotech Private Limited" : "Not Detected";
+        let gstin = isSample ? "27AAPFU0939F1ZV" : "Not Detected";
+        let pan = isSample ? "AAPFU0939F" : "Not Detected";
+        let ifsc = isSample ? "HDFC0000060" : "Not Detected";
+        let bank = isSample ? "HDFC Bank" : "Not Detected";
 
         if (report.documents && report.documents.length > 0) {
           for (const doc of report.documents) {
             const f = typeof doc.extractedFields === "string" ? JSON.parse(doc.extractedFields || "{}") : (doc.extractedFields || {});
-            if (f.legalBusinessName) legalName = f.legalBusinessName;
-            else if (f.name && legalName === "Acme Infotech Private Limited") legalName = f.name;
+            if (f.legalBusinessName && f.legalBusinessName !== "Not Detected") legalName = f.legalBusinessName;
+            else if (f.name && f.name !== "Not Detected" && (legalName === "Not Detected" || legalName === "Acme Infotech Private Limited")) legalName = f.name;
+            else if (f.accountHolderName && f.accountHolderName !== "Not Detected" && (legalName === "Not Detected" || legalName === "Acme Infotech Private Limited")) legalName = f.accountHolderName;
 
-            if (f.gstin) gstin = f.gstin;
-            if (f.panNumber) pan = f.panNumber;
-            if (f.ifsc) ifsc = f.ifsc;
-            if (f.bankName) bank = f.bankName;
+            if (f.gstin && f.gstin !== "NOT_DETECTED") gstin = f.gstin;
+            if (f.panNumber && f.panNumber !== "NOT_DETECTED") pan = f.panNumber;
+            else if (f.pan && f.pan !== "NOT_DETECTED") pan = f.pan;
+
+            if (f.ifsc && f.ifsc !== "NOT_DETECTED") ifsc = f.ifsc;
+            if (f.bankName && f.bankName !== "Not Detected") bank = f.bankName;
           }
         }
 

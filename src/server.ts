@@ -905,18 +905,14 @@ app.post("/api/session/:id/verify-bundle", upload.any(), async (req: Request, re
       });
     }
 
-    // Explicit demo query path or test fixtures for instant local/cloud demo execution
-    const isDemo = req.query.demo === "true" ||
-      req.body?.isDemo === "true" ||
-      files.some(f => {
-        const name = (f.originalname || "").toLowerCase();
-        return name.includes("genuine.jpg") || name.includes("altered.jpg") || name.includes("demo_fixtures");
-      });
+    // Explicit demo query path only when explicitly requested via ?demo=true query
+    const isDemo = req.query.demo === "true" || req.body?.isDemo === "true";
     if (isDemo) {
       const hasAltered = files.some(f => (f.originalname || "").toLowerCase().includes("altered") || (f.originalname || "").toLowerCase().includes("tamper"));
       const scenarioId = hasAltered ? "identity-mismatch" : "clean-pass";
-      const demoReport = await orchestrator.runDemoScenario(id, scenarioId, ANTHROPIC_API_KEY);
-      saveReportToStore(demoReport);
+      await orchestrator.runDemoScenario(id, scenarioId, ANTHROPIC_API_KEY);
+      const demoReport = await getFormattedReport(id);
+      if (demoReport) saveReportToStore(demoReport);
       res.status(200).json({
         success: true,
         sessionId: id,
@@ -925,7 +921,7 @@ app.post("/api/session/:id/verify-bundle", upload.any(), async (req: Request, re
       return;
     }
 
-    // Real document uploads: Process documents concurrently to avoid serverless gateway timeouts
+    // Real document uploads: Process every uploaded document through real OCR and forensics
     await Promise.all(
       files.map(async (file) => {
         let docType: DocType = "bank_proof";
@@ -947,7 +943,10 @@ app.post("/api/session/:id/verify-bundle", upload.any(), async (req: Request, re
       })
     );
 
-    // Fetch the full final report
+    // Run complete cross-document checks (GSTIN checksum, GSTIN-PAN match, Razorpay IFSC, legal name alignment, underwriter narrative)
+    await orchestrator.evaluateSessionChecks(id, ANTHROPIC_API_KEY);
+
+    // Fetch the full definitive report with all real documents and all real checks
     const report = await getFormattedReport(id);
     if (report) {
       saveReportToStore(report);

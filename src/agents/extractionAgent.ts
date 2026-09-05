@@ -153,11 +153,12 @@ async function extractWithRealTesseractOCR(filePath: string, docType: DocType, o
     const dateRegex = /\b([0-3]?[0-9][\/\-][0-1]?[0-9][\/\-][1-2][0-9]{3})\b/;
     const accountRegex = /\b([0-9]{9,18})\b/;
 
-    const gstinMatch = normalizedText.match(gstinRegex);
-    const panMatch = normalizedText.match(panRegex);
-    const ifscMatch = normalizedText.match(ifscRegex);
+    const collapsedText = fullText.replace(/[\s\-\.:]+/g, "");
+    const gstinMatch = normalizedText.match(gstinRegex) || collapsedText.match(/([0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[0-9A-Z]{1}[Z]{1}[0-9A-Z]{1})/i);
+    const panMatch = normalizedText.match(panRegex) || collapsedText.match(/([A-Z]{5}[0-9]{4}[A-Z]{1})/i);
+    const ifscMatch = normalizedText.match(ifscRegex) || collapsedText.match(/([A-Z]{4}0[A-Z0-9]{6})/i);
     const dateMatch = normalizedText.match(dateRegex);
-    const accountMatch = normalizedText.match(accountRegex);
+    const accountMatch = normalizedText.match(accountRegex) || collapsedText.match(/(\d{9,18})/);
 
     if (docType === "gst_certificate") {
       // Find possible business name line
@@ -197,14 +198,21 @@ async function extractWithRealTesseractOCR(filePath: string, docType: DocType, o
     if (docType === "pan_card") {
       // Find candidate name line
       let panName = "";
-      for (const line of rawLines) {
+      for (let i = 0; i < rawLines.length; i++) {
+        const line = rawLines[i];
         if (/name|father/i.test(line)) {
-          panName = line.replace(/.*name[:\s]*/i, "").trim();
-          if (panName) break;
+          let candidate = line.replace(/.*(?:name|father)(?:\s+on\s+card)?[:\s]*/i, "").trim();
+          if (!candidate || candidate.length < 3 || /^(?:on card|holder)$/i.test(candidate)) {
+            candidate = (rawLines[i + 1] || "").trim();
+          }
+          if (candidate && candidate.length > 2 && !/income|tax|govt|india|permanent/i.test(candidate)) {
+            panName = candidate.replace(/\s*(?:photo|sign).*/i, "").trim();
+            break;
+          }
         }
       }
       if (!panName && rawLines.length > 1) {
-        panName = rawLines.find((l: string) => l.length > 4 && !/\d/.test(l) && !/income|tax|govt|india/i.test(l)) || "";
+        panName = rawLines.find((l: string) => l.length > 4 && !/\d/.test(l) && !/income|tax|govt|india|permanent|card/i.test(l)) || "";
       }
 
       const fields: PanFields = {
@@ -236,8 +244,19 @@ async function extractWithRealTesseractOCR(filePath: string, docType: DocType, o
       }
     }
 
+    let holderName = "";
+    for (const line of rawLines) {
+      if (/account\s*holder|payee|name[:\s]/i.test(line)) {
+        holderName = line.replace(/.*(?:account\s*holder|payee|name)[:\s]*/i, "").trim();
+        if (holderName) break;
+      }
+    }
+    if (!holderName) {
+      holderName = rawLines.find((l: string) => l.length > 4 && !/\d{4,}/.test(l) && !/cheque|bank|branch|pay|rtgs|neft|ifsc/i.test(l)) || "Not Detected";
+    }
+
     const fields: ChequeFields = {
-      accountHolderName: rawLines.find((l: string) => l.length > 4 && !/\d{4,}/.test(l) && !/cheque|bank|branch|pay/i.test(l)) || "Not Detected",
+      accountHolderName: holderName.replace(/\s*(?:e\s*limited|ltd)$/i, " LIMITED").trim() || "Not Detected",
       accountNumber: accountMatch ? accountMatch[1] : "NOT_DETECTED",
       ifsc: ifscMatch ? ifscMatch[1].toUpperCase() : "NOT_DETECTED",
       bankName: bankFound || (rawLines[0] || "Not Detected"),

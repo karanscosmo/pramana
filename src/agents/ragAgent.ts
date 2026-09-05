@@ -284,9 +284,10 @@ function synthesizeDeterministicAnswer(
     if (fields.pan && !foundPan) foundPan = fields.pan;
     if (fields.panNumber && !foundPan) foundPan = fields.panNumber;
     if (fields.ifsc && !foundIfsc) foundIfsc = fields.ifsc;
-    if (fields.legalBusinessName && !foundName) foundName = fields.legalBusinessName;
-    if (fields.accountHolderName && !foundName) foundName = fields.accountHolderName;
-    if (fields.bankName && !foundBank) foundBank = fields.bankName;
+    if (fields.legalBusinessName && !foundName && fields.legalBusinessName !== "Not Detected") foundName = fields.legalBusinessName;
+    if (fields.name && !foundName && fields.name !== "Not Detected") foundName = fields.name;
+    if (fields.accountHolderName && !foundName && fields.accountHolderName !== "Not Detected") foundName = fields.accountHolderName;
+    if (fields.bankName && !foundBank && fields.bankName !== "Not Detected") foundBank = fields.bankName;
   });
 
   retrieved.forEach((r) => {
@@ -301,17 +302,17 @@ function synthesizeDeterministicAnswer(
     if (ifscMatch && !foundIfsc) foundIfsc = ifscMatch[1];
 
     const nameMatch = c.match(/(?:legalBusinessName|accountHolderName|name)["']?:\s*["']?([^"'}]+)/i);
-    if (nameMatch && !foundName) foundName = nameMatch[1].trim();
+    if (nameMatch && !foundName && nameMatch[1].trim() !== "Not Detected") foundName = nameMatch[1].trim();
 
     const bankMatch = c.match(/bankName["']?:\s*["']?([^"'}]+)/i);
-    if (bankMatch && !foundBank) foundBank = bankMatch[1].trim();
+    if (bankMatch && !foundBank && bankMatch[1].trim() !== "Not Detected") foundBank = bankMatch[1].trim();
   });
 
   // 1. Underwriter Recommendation / Decision
   if (q.includes("underwriter") || q.includes("recommend") || q.includes("verdict") || q.includes("memo") || q.includes("decision") || q.includes("approval")) {
     const isApproved = session.overallResult === "verified" || session.overallResult === "passed";
     if (isApproved) {
-      return `Based on the verification memo, the underwriter recommends **approving this merchant**. All submitted documents (**PAN Card**, **GST Certificate**, and **Bank Cheque**) passed automated cross-matching with **zero discrepancies**, and all statutory compliance checks were verified successfully.`;
+      return `Based on the verification memo, the underwriter recommends **approving this merchant**. All submitted documents (${foundName ? `for **${foundName}**` : "on file"}) passed automated cross-matching with **zero discrepancies**, and all statutory compliance checks were verified successfully.`;
     } else {
       const failed = (session.checks || []).filter((c: any) => c.result === "fail");
       const issues = failed.map((f: any) => f.detail).join("; ");
@@ -346,22 +347,32 @@ function synthesizeDeterministicAnswer(
     const chk = (session.checks || []).find((c: any) => c.checkType === "gstin_checksum");
     const gstinValid = !chk || chk.result === "pass";
 
-    let resp = `The legal business name is **${foundName || "Acme Infotech Private Limited"}**`;
+    if (!foundName && !foundGstin) {
+      return `No business name or GSTIN could be resolved from the uploaded documents yet. Please ensure clear images of your GST Certificate and PAN Card are uploaded.`;
+    }
+
+    let resp = `The legal business name on record is **${foundName || "not clearly detected"}**`;
     if (foundGstin) {
       resp += `, registered under GSTIN **${foundGstin}** (${gstinValid ? "valid Modulo-36 verified" : "checksum flagged"})`;
     }
-    resp += `. The business identity matches consistently across all submitted onboarding records.`;
+    resp += `.`;
     return resp;
   }
 
   // 5. Standalone PAN Details
   if (q.includes("pan")) {
-    return `The Permanent Account Number (PAN) on record is **${foundPan || "AAACT2727Q"}**. It conforms to Income Tax Department syntax standards and links to the business entity.`;
+    if (!foundPan) {
+      return `The Permanent Account Number (PAN) was not detected in the submitted files. Please upload a clear image of the PAN card.`;
+    }
+    return `The Permanent Account Number (PAN) on record is **${foundPan}**. It conforms to Income Tax Department syntax standards and links to the business entity.`;
   }
 
   // 6. Bank & IFSC Details
   if (q.includes("bank") || q.includes("ifsc") || q.includes("cheque") || q.includes("account")) {
-    return `The bank account belongs to **${foundBank || "HDFC Bank"}** with IFSC code **${foundIfsc || "HDFC0000060"}**. The IFSC code was verified directly against the live Razorpay bank registry as an active, valid clearing branch.`;
+    if (!foundIfsc && !foundBank) {
+      return `Bank proof details were not detected in the submitted files. Please upload a clear cancelled cheque or bank statement.`;
+    }
+    return `The bank account belongs to **${foundBank || "detected bank"}** with IFSC code **${foundIfsc || "on record"}**. The IFSC code was verified directly against the live Razorpay bank registry as an active, valid clearing branch.`;
   }
 
   // General grounded synthesis

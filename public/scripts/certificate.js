@@ -25,11 +25,20 @@ export function formatCertificateHTML(report) {
         try { fields = JSON.parse(fields); } catch (e) {}
       }
       if (fields) {
-        if (fields.legalBusinessName) businessName = fields.legalBusinessName;
-        if (fields.gstin) gstin = fields.gstin;
-        if (fields.pan) pan = fields.pan;
-        if (fields.bankName) bankName = fields.bankName;
-        if (fields.ifsc) ifsc = fields.ifsc;
+        if (fields.legalBusinessName && fields.legalBusinessName !== "Not Detected") {
+          businessName = fields.legalBusinessName;
+        } else if (businessName === "N/A" && fields.name && fields.name !== "Not Detected") {
+          businessName = fields.name;
+        } else if (businessName === "N/A" && fields.accountHolderName && fields.accountHolderName !== "Not Detected") {
+          businessName = fields.accountHolderName;
+        }
+
+        if (fields.gstin && fields.gstin !== "NOT_DETECTED") gstin = fields.gstin;
+        if (fields.panNumber && fields.panNumber !== "NOT_DETECTED") pan = fields.panNumber;
+        else if (fields.pan && fields.pan !== "NOT_DETECTED") pan = fields.pan;
+
+        if (fields.bankName && fields.bankName !== "Not Detected") bankName = fields.bankName;
+        if (fields.ifsc && fields.ifsc !== "NOT_DETECTED") ifsc = fields.ifsc;
       }
     });
   }
